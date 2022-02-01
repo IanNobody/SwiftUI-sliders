@@ -7,11 +7,13 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		D19D33D627A9B9DD00E647E8 /* PreciseSlider.swift in Sources */ = {isa = PBXBuildFile; fileRef = D19D33D527A9B9DD00E647E8 /* PreciseSlider.swift */; };
 		D1C33C4F27A7DC5F00A73AEB /* SwiftUI_sliders.docc in Sources */ = {isa = PBXBuildFile; fileRef = D1C33C4E27A7DC5F00A73AEB /* SwiftUI_sliders.docc */; };
 		D1C33C5027A7DC5F00A73AEB /* SwiftUI_sliders.h in Headers */ = {isa = PBXBuildFile; fileRef = D1C33C4D27A7DC5F00A73AEB /* SwiftUI_sliders.h */; settings = {ATTRIBUTES = (Public, ); }; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		D19D33D527A9B9DD00E647E8 /* PreciseSlider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PreciseSlider.swift; sourceTree = "<group>"; };
 		D1C33C4A27A7DC5F00A73AEB /* SwiftUI_sliders.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = SwiftUI_sliders.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		D1C33C4D27A7DC5F00A73AEB /* SwiftUI_sliders.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = SwiftUI_sliders.h; sourceTree = "<group>"; };
 		D1C33C4E27A7DC5F00A73AEB /* SwiftUI_sliders.docc */ = {isa = PBXFileReference; lastKnownFileType = folder.documentationcatalog; path = SwiftUI_sliders.docc; sourceTree = "<group>"; };
@@ -49,6 +51,7 @@
 			children = (
 				D1C33C4D27A7DC5F00A73AEB /* SwiftUI_sliders.h */,
 				D1C33C4E27A7DC5F00A73AEB /* SwiftUI_sliders.docc */,
+				D19D33D527A9B9DD00E647E8 /* PreciseSlider.swift */,
 			);
 			path = "SwiftUI-sliders";
 			sourceTree = "<group>";
@@ -132,6 +135,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				D19D33D627A9B9DD00E647E8 /* PreciseSlider.swift in Sources */,
 				D1C33C4F27A7DC5F00A73AEB /* SwiftUI_sliders.docc in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
