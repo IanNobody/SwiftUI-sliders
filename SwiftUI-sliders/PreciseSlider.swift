@@ -10,7 +10,7 @@ import SwiftUI
 struct PreciseSlider: View {
     @State var value: Double = 0.0
     @State var prevValue: Double = 0.0
-    
+        
     @State var scale: Double = 1.0
     @State var prevScale: Double = 1.0
     
@@ -47,7 +47,7 @@ struct PreciseSlider: View {
     private var offset: CGFloat {
         var truncValue = value.truncatingRemainder(dividingBy: unit)
         
-        // Oprava nepřesnosti funkce truncatingReminder
+        // Oprava nepřesností
         if (unit - truncValue) < (unit / 1000) {
             truncValue = 0
         }
@@ -71,6 +71,11 @@ struct PreciseSlider: View {
                         .background(Color.black)
                         .font(Font.system(size:7, design: .rounded))
                         .foregroundColor(getUnitColor(ofIndex: index))
+                        .frame(width:
+                                truncScale < 1.15 ?
+                                    5 * designUnit :
+                                (truncScale < 3.0 ? designUnit * 2 : designUnit),
+                               height: 15)
                 }
                 .offset(getUnitOffset(ofIndex: index))
             }
@@ -114,16 +119,17 @@ struct PreciseSlider: View {
         
         return .init(width: offset, height: .zero)
     }
-    
-    private func getUnitOpacity(ofIndex index: Int) -> Double {
-        return 1.0
-    }
-    
-    private func getUnitColor(ofIndex index: Int) -> Color {
-        return .white
+        
+    private func getUnitValue(ofIndex index: Int) -> Double {
+        return (value - (offset / designUnit * unit) - (unit * Double(index - middleIndex)))
     }
     
     private func getUnitLabel(ofIndex index: Int) -> String {
+        if truncScale > 3.0 ||
+            getRelativeIndex(ofIndex: index) % 5 == 0 {
+            return String(getUnitValue(ofIndex: index))
+        }
+        //
         return ""
     }
     
@@ -132,6 +138,16 @@ struct PreciseSlider: View {
             - Int((value / unit)
                     .truncatingRemainder(dividingBy: 5))
             - Int(middleIndex % 5)
+    }
+    
+    // Nepoužito
+    private func getUnitOpacity(ofIndex index: Int) -> Double {
+        return 1.0
+    }
+    
+    // Nepoužito
+    private func getUnitColor(ofIndex index: Int) -> Color {
+        return .white
     }
 }
 
