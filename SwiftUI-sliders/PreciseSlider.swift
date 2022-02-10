@@ -87,7 +87,7 @@ struct PreciseSlider: View {
         .gesture(
             DragGesture()
                 .onChanged { gesture in
-                    value = prevValue + (gesture.translation.width / scale)
+                    value = prevValue - (gesture.translation.width / scale)
                 }
                 .onEnded { _ in
                     prevValue = value
@@ -113,18 +113,18 @@ struct PreciseSlider: View {
             let height = (truncScale - 1) / 3 * 20
             return height < 20.0 ? height : 20.0
         }
-        
+        //
         return 20.0
     }
     
     private func getUnitOffset(ofIndex index: Int) -> CGSize {
-        let offset = (CGFloat(index) * designUnit) - (CGFloat(middleIndex) * designUnit) + offset
+        let offset = (CGFloat(index) * designUnit) - (CGFloat(middleIndex) * designUnit) - offset
         
         return .init(width: offset, height: .zero)
     }
         
     private func getUnitValue(ofIndex index: Int) -> Double {
-        return (value - (offset / designUnit * unit) - (unit * Double(index - middleIndex)))
+        return (value - (offset / designUnit * unit) + (unit * Double(index - middleIndex)))
     }
     
     private func getUnitLabel(ofIndex index: Int) -> String {
@@ -138,7 +138,7 @@ struct PreciseSlider: View {
     
     private func getRelativeIndex(ofIndex index: Int) -> Int {
         return index
-            - Int((value / unit)
+            + Int((value / unit)
                     .truncatingRemainder(dividingBy: 5))
             - Int(middleIndex % 5)
     }
