@@ -58,6 +58,7 @@ struct PreciseSlider: View {
     
     var body: some View {
         ZStack {
+            // Pozadí
             Rectangle().frame(width: 400, height: 50, alignment: .center).foregroundColor(Color.black)
             //
             ForEach(0..<numberOfUnits) { index in
@@ -79,6 +80,8 @@ struct PreciseSlider: View {
                 }
                 .offset(getUnitOffset(ofIndex: index))
             }
+            // Středový bod
+            Rectangle().frame(width: 1, height: 30).foregroundColor(.blue)
         }
         // Výběr hodnoty
         .gesture(
