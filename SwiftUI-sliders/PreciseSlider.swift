@@ -27,6 +27,10 @@ struct PreciseSlider: View {
     private let numberOfUnits: Int = 41
     // Výchozí vzdálenost mezi jednotkami
     private let defaultStep: CGFloat = 10.0
+    // Meze posuvníku
+    private let isInfinite: Bool = false
+    private let maxValue: Double = 1000.0
+    private let minValue: Double = -1000.0
     
     // Reálná hodnota zobrazené jednotky
     private var unit: CGFloat {
@@ -59,7 +63,7 @@ struct PreciseSlider: View {
     var body: some View {
         ZStack {
             // Pozadí
-            Rectangle().frame(width: 400, height: 50, alignment: .center).foregroundColor(Color.black)
+            Rectangle().frame(width: 360, height: 50, alignment: .center).foregroundColor(Color.black)
             //
             ForEach(0..<numberOfUnits) { index in
                 ZStack {
@@ -72,6 +76,7 @@ struct PreciseSlider: View {
                         .background(Color.black)
                         .font(Font.system(size:7, design: .rounded))
                         .foregroundColor(getUnitColor(ofIndex: index))
+                        .opacity(getUnitOpacity(ofIndex: index))
                         .frame(width:
                                 truncScale < 1.15 ?
                                     5 * designUnit :
@@ -87,7 +92,17 @@ struct PreciseSlider: View {
         .gesture(
             DragGesture()
                 .onChanged { gesture in
-                    value = prevValue - (gesture.translation.width / scale)
+                    let newValue = prevValue - (gesture.translation.width / scale)
+                    
+                    if isInfinite ||
+                        (newValue <= maxValue &&
+                        newValue >= minValue) {
+                        value = newValue
+                    }
+                    else {
+                        value = newValue > maxValue ?
+                        maxValue : minValue
+                    }
                 }
                 .onEnded { _ in
                     prevValue = value
@@ -145,7 +160,14 @@ struct PreciseSlider: View {
     
     // Nepoužito
     private func getUnitOpacity(ofIndex index: Int) -> Double {
-        return 1.0
+        if (getUnitValue(ofIndex: index) > maxValue ||
+            getUnitValue(ofIndex: index) < minValue) &&
+            !isInfinite {
+            return 0.0
+        }
+        else {
+            return 1.0
+        }
     }
     
     // Nepoužito
