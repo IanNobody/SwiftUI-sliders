@@ -64,6 +64,8 @@ struct PreciseSliderView: View {
         .gesture(
             DragGesture()
                 .onChanged { gesture in
+                    viewModel.interruptAnimation()
+                    
                     let newValue = viewModel.prevValue - (gesture.translation.width / viewModel.scale)
                     
                     if viewModel.isInfinite ||
@@ -76,7 +78,9 @@ struct PreciseSliderView: View {
                         viewModel.maxValue : viewModel.minValue
                     }
                 }
-                .onEnded { _ in
+                .onEnded { gesture in
+                    viewModel.animateMomentum(byValue: (gesture.translation.width - gesture.predictedEndTranslation.width) / viewModel.scale)
+                    
                     viewModel.editingValueEnded()
                 }
         )
@@ -84,6 +88,8 @@ struct PreciseSliderView: View {
         .gesture(
             MagnificationGesture()
                 .onChanged { gesture in
+                    viewModel.interruptAnimation()
+                    
                     let newScale = viewModel.prevScale * gesture.magnitude
                     
                     // Ošetření minimální hodnoty
@@ -93,6 +99,7 @@ struct PreciseSliderView: View {
                     viewModel.editingScaleEnded()
                 }
         )
+        // TODO: Zastavení animace jinými gesty
     }
     
     private func getUnitLabel(ofIndex index: Int) -> Text {

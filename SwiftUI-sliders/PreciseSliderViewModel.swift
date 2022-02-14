@@ -24,6 +24,10 @@ class PreciseSliderViewModel: ObservableObject {
     public var prevValue: Double = Double.zero
     public var prevScale: Double = Double.zero
     
+    // Proměnné pro řízení animované setrvačnosti osy
+    private var destValue: Double = Double.zero
+    private var animationTimer: Timer?
+    
     public var dataSource: PreciseSliderDataSource? {
         didSet {
             value = dataSource?.preciseSliderInitialValue() ?? Double.zero
@@ -99,6 +103,38 @@ class PreciseSliderViewModel: ObservableObject {
 
         // Transformace do báze vizualizace
         return (truncValue / unit) * designUnit
+    }
+    
+    //
+    
+    public func animateMomentum(byValue difference: Double) {
+        destValue = value + difference
+        animationTimer = Timer.scheduledTimer(
+            // TODO: Zajistit dynamiku
+            timeInterval: 1/60,
+            target: self,
+            selector: #selector(makeAnimationStep),
+            userInfo: nil,
+            repeats: true
+        )
+    }
+    
+    @objc private func makeAnimationStep() {
+        if abs(destValue - value) < (unit / designUnit) {
+            interruptAnimation()
+        }
+        else {
+            value += (destValue - value) / 10
+            prevValue = value
+        }
+    }
+    
+    public func interruptAnimation() {
+        if animationTimer != nil {
+            if animationTimer?.isValid == true {
+                animationTimer?.invalidate()
+            }
+        }
     }
     
     //
