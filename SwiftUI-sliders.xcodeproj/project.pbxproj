@@ -10,6 +10,7 @@
 		D19D33D627A9B9DD00E647E8 /* PreciseSliderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D19D33D527A9B9DD00E647E8 /* PreciseSliderView.swift */; };
 		D1B8821927B69CCE003351A0 /* PreciseSliderDataSource.swift in Sources */ = {isa = PBXBuildFile; fileRef = D1B8821827B69CCE003351A0 /* PreciseSliderDataSource.swift */; };
 		D1B8821B27B6A7B6003351A0 /* PreciseSliderViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = D1B8821A27B6A7B6003351A0 /* PreciseSliderViewModel.swift */; };
+		D1B8822127B7F60C003351A0 /* PreciseSliderDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = D1B8822027B7F60C003351A0 /* PreciseSliderDelegate.swift */; };
 		D1C33C4F27A7DC5F00A73AEB /* SwiftUI_sliders.docc in Sources */ = {isa = PBXBuildFile; fileRef = D1C33C4E27A7DC5F00A73AEB /* SwiftUI_sliders.docc */; };
 		D1C33C5027A7DC5F00A73AEB /* SwiftUI_sliders.h in Headers */ = {isa = PBXBuildFile; fileRef = D1C33C4D27A7DC5F00A73AEB /* SwiftUI_sliders.h */; settings = {ATTRIBUTES = (Public, ); }; };
 /* End PBXBuildFile section */
@@ -18,6 +19,7 @@
 		D19D33D527A9B9DD00E647E8 /* PreciseSliderView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PreciseSliderView.swift; sourceTree = "<group>"; };
 		D1B8821827B69CCE003351A0 /* PreciseSliderDataSource.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PreciseSliderDataSource.swift; sourceTree = "<group>"; };
 		D1B8821A27B6A7B6003351A0 /* PreciseSliderViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PreciseSliderViewModel.swift; sourceTree = "<group>"; };
+		D1B8822027B7F60C003351A0 /* PreciseSliderDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PreciseSliderDelegate.swift; sourceTree = "<group>"; };
 		D1C33C4A27A7DC5F00A73AEB /* SwiftUI_sliders.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = SwiftUI_sliders.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		D1C33C4D27A7DC5F00A73AEB /* SwiftUI_sliders.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = SwiftUI_sliders.h; sourceTree = "<group>"; };
 		D1C33C4E27A7DC5F00A73AEB /* SwiftUI_sliders.docc */ = {isa = PBXFileReference; lastKnownFileType = folder.documentationcatalog; path = SwiftUI_sliders.docc; sourceTree = "<group>"; };
@@ -58,6 +60,7 @@
 				D19D33D527A9B9DD00E647E8 /* PreciseSliderView.swift */,
 				D1B8821827B69CCE003351A0 /* PreciseSliderDataSource.swift */,
 				D1B8821A27B6A7B6003351A0 /* PreciseSliderViewModel.swift */,
+				D1B8822027B7F60C003351A0 /* PreciseSliderDelegate.swift */,
 			);
 			path = "SwiftUI-sliders";
 			sourceTree = "<group>";
@@ -142,6 +145,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				D19D33D627A9B9DD00E647E8 /* PreciseSliderView.swift in Sources */,
+				D1B8822127B7F60C003351A0 /* PreciseSliderDelegate.swift in Sources */,
 				D1B8821B27B6A7B6003351A0 /* PreciseSliderViewModel.swift in Sources */,
 				D1B8821927B69CCE003351A0 /* PreciseSliderDataSource.swift in Sources */,
 				D1C33C4F27A7DC5F00A73AEB /* SwiftUI_sliders.docc in Sources */,

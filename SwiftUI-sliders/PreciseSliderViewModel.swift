@@ -9,16 +9,51 @@ import Foundation
 import SwiftUI
 
 class PreciseSliderViewModel: ObservableObject {
-    @Published var value: Double = Double.zero
-    @Published var scale: Double = 1.0
+    @Published var value: Double = Double.zero {
+        didSet {
+            delegate?.valueDidChange(value: value)
+        }
+    }
+    
+    @Published var scale: Double = 1.0 {
+        didSet {
+            delegate?.scaleDidChange(scale: scale)
+        }
+    }
     
     public var prevValue: Double = Double.zero
     public var prevScale: Double = Double.zero
     
+    public var dataSource: PreciseSliderDataSource? {
+        didSet {
+            value = dataSource?.preciseSliderInitialValue() ?? Double.zero
+            prevValue = value
+            //
+            scale = dataSource?.preciseSliderInitialScale() ?? 1.0
+            prevScale = scale
+        }
+    }
+    
+    public var delegate: PreciseSliderDelegate?
+    
     // Meze posuvníku
-    public var isInfinite: Bool = false
-    public var maxValue: Double = 1000.0
-    public var minValue: Double = -1000.0
+    public var maxValue: Double {
+        get {
+            return dataSource?.preciseSliderMaximalValue() ?? 1000.0
+        }
+    }
+    
+    public var minValue: Double {
+        get {
+            return dataSource?.preciseSliderMinimalValue() ?? -1000.0
+        }
+    }
+    
+    public var isInfinite: Bool {
+        get {
+            return dataSource?.preciseSliderFinity() ?? true
+        }
+    }
     
     // Počet jednotek osy
     // TODO: Implementovat dynamiku v závislosti na rozměrech
@@ -65,6 +100,8 @@ class PreciseSliderViewModel: ObservableObject {
         // Transformace do báze vizualizace
         return (truncValue / unit) * designUnit
     }
+    
+    //
     
     public func editingValueEnded() {
         prevValue = value

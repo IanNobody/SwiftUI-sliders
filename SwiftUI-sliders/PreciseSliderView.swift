@@ -9,13 +9,33 @@ import SwiftUI
 
 struct PreciseSliderView: View {
     @ObservedObject var viewModel = PreciseSliderViewModel()
-
+    
+    //
+    public var dataSource: PreciseSliderDataSource? {
+        get {
+            return viewModel.dataSource
+        }
+        set {
+            viewModel.dataSource = newValue
+        }
+    }
+    
+    //
+    public var delegate: PreciseSliderDelegate? {
+        get {
+            return viewModel.delegate
+        }
+        set {
+            viewModel.delegate = newValue
+        }
+    }
+    
     // TODO: Dynamické rozměry komponenty
-    // TODO: DataSource/Delegate rozhraní
+    // TODO: Vyřešit chyby vzniklé nedokončenými gesty (nevyvolání události .onEnded)
     var body: some View {
         ZStack {
             // Pozadí
-            Rectangle().frame(width: 360, height: 50, alignment: .center).foregroundColor(Color.black)
+            Rectangle().frame(width: 360, height: 50, alignment: .center).foregroundColor(dataSource?.preciseSliderBackGroundColor() ?? .black)
             //
             ForEach(0..<viewModel.numberOfUnits) { index in
                 ZStack {
@@ -24,10 +44,10 @@ struct PreciseSliderView: View {
                         .foregroundColor(getUnitColor(ofIndex: index))
                         .opacity(viewModel.getUnitOpacity(ofIndex: index))
                     //
-                    Text(getUnitLabel(ofIndex: index))
+                    getUnitLabel(ofIndex: index)
                         .background(Color.black)
                         .font(Font.system(size:7, design: .rounded))
-                        .foregroundColor(getUnitColor(ofIndex: index))
+                        .foregroundColor(dataSource?.preciseSliderUnitColor(value: viewModel.getUnitValue(ofIndex: index), relativeIndex: viewModel.getRelativeIndex(ofIndex: index)) ?? .white)
                         .opacity(viewModel.getUnitOpacity(ofIndex: index))
                         .frame(width:
                                 viewModel.truncScale < 1.15 ?
@@ -75,19 +95,31 @@ struct PreciseSliderView: View {
         )
     }
     
-    // TODO: Uživatelský vstup - DataSource
-    private func getUnitLabel(ofIndex index: Int) -> String {
-        if viewModel.truncScale > 3.0 ||
-            viewModel.getRelativeIndex(ofIndex: index) % 5 == 0 {
-            return String(viewModel.getUnitValue(ofIndex: index))
+    private func getUnitLabel(ofIndex index: Int) -> Text {
+        let unitValue = viewModel.getUnitValue(ofIndex: index)
+        
+        if let label = dataSource?.preciseSliderUnitLabel(value: unitValue) {
+            return label
         }
-        //
-        return ""
+        else {
+            return getDefaultUnitLabel(ofIndex: index)
+        }
     }
     
-    // TODO: Uživatelský vstup - DataSource
+    private func getDefaultUnitLabel(ofIndex index: Int) -> Text {
+        if viewModel.truncScale > 3.0 ||
+            viewModel.getRelativeIndex(ofIndex: index) % 5 == 0 {
+            return Text(String(viewModel.getUnitValue(ofIndex: index)))
+        }
+        //
+        return Text("")
+    }
+    
     private func getUnitColor(ofIndex index: Int) -> Color {
-        return .white
+        return dataSource?.preciseSliderUnitColor(
+            value: viewModel.getUnitValue(ofIndex: index),
+            relativeIndex: viewModel.getRelativeIndex(ofIndex: index)
+        ) ?? .white
     }
 }
 
