@@ -22,7 +22,7 @@ class PreciseSliderViewModel: ObservableObject {
     }
     
     public var prevValue: Double = Double.zero
-    public var prevScale: Double = Double.zero
+    public var prevScale: Double = 1.0
     
     // Proměnné pro řízení animované setrvačnosti osy
     private var destValue: Double = Double.zero
@@ -30,33 +30,30 @@ class PreciseSliderViewModel: ObservableObject {
     
     public var dataSource: PreciseSliderDataSource? {
         didSet {
-            value = dataSource?.preciseSliderInitialValue() ?? Double.zero
+            value = dataSource?.initialValue ?? Double.zero
             prevValue = value
             //
-            scale = dataSource?.preciseSliderInitialScale() ?? 1.0
+            scale = dataSource?.initialScale ?? 1.0
             prevScale = scale
         }
     }
     
     public var delegate: PreciseSliderDelegate?
     
+    private let defaultMaxValue: Double = 1000.0
+    private let defaultMinValue: Double = -1000.0
+    
     // Meze posuvníku
     public var maxValue: Double {
-        get {
-            return dataSource?.preciseSliderMaximalValue() ?? 1000.0
-        }
+        dataSource?.maximumValue ?? defaultMaxValue
     }
     
     public var minValue: Double {
-        get {
-            return dataSource?.preciseSliderMinimalValue() ?? -1000.0
-        }
+        dataSource?.minimumValue ?? defaultMinValue
     }
     
     public var isInfinite: Bool {
-        get {
-            return dataSource?.preciseSliderFinity() ?? true
-        }
+        dataSource?.isFinite ?? true
     }
     
     // Počet jednotek osy
@@ -67,14 +64,14 @@ class PreciseSliderViewModel: ObservableObject {
     
     // Index středu osy
     public var middleIndex: Int {
-        return (numberOfUnits / 2) + 1
+        (numberOfUnits / 2) + 1
     }
     
     // Výchozí vzdálenost mezi jednotkami
     private let defaultStep: CGFloat = 10.0
     
     public var truncScale: Double {
-        return scale / scaleBase
+        scale / scaleBase
     }
     
     public var scaleBase: Double {
@@ -84,12 +81,12 @@ class PreciseSliderViewModel: ObservableObject {
     
     // Reálná hodnota zobrazené jednotky
     public var unit: CGFloat {
-        return Double(defaultStep) / scaleBase
+        Double(defaultStep) / scaleBase
     }
     
     // Grafická vzdálenost jedné jednotky
     public var designUnit: CGFloat {
-        return CGFloat(defaultStep) * truncScale
+        CGFloat(defaultStep) * truncScale
     }
     
     // Posuv osy v rámci jedné jednotky
@@ -147,8 +144,8 @@ class PreciseSliderViewModel: ObservableObject {
         prevScale = scale
     }
     
-    public func getUnitHeight(ofIndex index: Int) -> CGFloat {
-        if getRelativeIndex(ofIndex: index) % 5 != 0 {
+    public func unitHeight(forIndex index: Int) -> CGFloat {
+        if relativeIndex(forIndex: index) % 5 != 0 {
             let height = (truncScale - 1) / 3 * maxUnitHeight
             return height < maxUnitHeight ? height : maxUnitHeight
         }
@@ -156,24 +153,24 @@ class PreciseSliderViewModel: ObservableObject {
         return maxUnitHeight
     }
     
-    public func getUnitOpacity(ofIndex index: Int) -> Double {
-        if (getUnitValue(ofIndex: index) > maxValue ||
-            getUnitValue(ofIndex: index) < minValue) &&
+    public func unitVisibility(ofIndex index: Int) -> Bool {
+        if (unitValue(forIndex: index) > maxValue ||
+            unitValue(forIndex: index) < minValue) &&
             !isInfinite {
-            return 0.0
+            return false
         }
         else {
-            return 1.0
+            return true
         }
     }
     
-    public func getRelativeIndex(ofIndex index: Int) -> Int {
+    public func relativeIndex(forIndex index: Int) -> Int {
         return index
             + Int((value / unit).truncatingRemainder(dividingBy: 5))
             - Int(middleIndex % 5)
     }
     
-    public func getUnitOffset(ofIndex index: Int) -> CGSize {
+    public func unitOffset(forIndex index: Int) -> CGSize {
         let offset = (
             (CGFloat(index) * designUnit)
             - (CGFloat(middleIndex) * designUnit)
@@ -183,7 +180,7 @@ class PreciseSliderViewModel: ObservableObject {
         return .init(width: offset, height: .zero)
     }
         
-    public func getUnitValue(ofIndex index: Int) -> Double {
+    public func unitValue(forIndex index: Int) -> Double {
         return (
             value
             - (offset / designUnit * unit)

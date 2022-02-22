@@ -7,7 +7,7 @@
 
 import Foundation
 
-protocol PreciseSliderDelegate: NSObject {
+protocol PreciseSliderDelegate: AnyObject {
     func valueDidChange(value: Double)
     func scaleDidChange(scale: Double)
 }

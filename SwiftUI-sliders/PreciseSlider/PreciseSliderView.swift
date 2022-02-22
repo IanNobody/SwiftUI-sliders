@@ -35,27 +35,27 @@ struct PreciseSliderView: View {
     var body: some View {
         ZStack {
             // Pozadí
-            Rectangle().frame(width: 360, height: 50, alignment: .center).foregroundColor(dataSource?.preciseSliderBackGroundColor() ?? .black)
+            Rectangle().frame(width: 360, height: 50, alignment: .center).foregroundColor(dataSource?.backgroundColor ?? .black)
             //
             ForEach(0..<viewModel.numberOfUnits) { index in
                 ZStack {
-                    Rectangle()
-                        .frame(width: 1, height: viewModel.getUnitHeight(ofIndex: index), alignment: .leading)
-                        .foregroundColor(getUnitColor(ofIndex: index))
-                        .opacity(viewModel.getUnitOpacity(ofIndex: index))
-                    //
-                    getUnitLabel(ofIndex: index)
-                        .background(Color.black)
-                        .font(Font.system(size:7, design: .rounded))
-                        .foregroundColor(dataSource?.preciseSliderUnitColor(value: viewModel.getUnitValue(ofIndex: index), relativeIndex: viewModel.getRelativeIndex(ofIndex: index)) ?? .white)
-                        .opacity(viewModel.getUnitOpacity(ofIndex: index))
-                        .frame(width:
-                                viewModel.truncScale < 1.15 ?
-                               5 * viewModel.designUnit :
-                                (viewModel.truncScale < 3.0 ? viewModel.designUnit * 2 : viewModel.designUnit),
-                               height: 15)
-                }
-                .offset(viewModel.getUnitOffset(ofIndex: index))
+                    if viewModel.unitVisibility(ofIndex: index)
+                    {
+                        Rectangle()
+                            .frame(width: 1, height: viewModel.unitHeight(forIndex: index), alignment: .leading)
+                            .foregroundColor(unitColor(forIndex: index))
+                        //
+                        unitLabel(forIndex: index)
+                            .background(Color.black)
+                            .font(Font.system(size:7, design: .rounded))
+                            .foregroundColor(dataSource?.unitColor(forValue: viewModel.unitValue(forIndex: index), forIndex: viewModel.relativeIndex(forIndex: index)) ?? .white)
+                            .frame(width:
+                                    viewModel.truncScale < 1.15 ?
+                                   5 * viewModel.designUnit :
+                                    (viewModel.truncScale < 3.0 ? viewModel.designUnit * 2 : viewModel.designUnit),
+                                   height: 15)
+                    }
+                }.offset(viewModel.unitOffset(forIndex: index))
             }
             // Středový bod
             Rectangle().frame(width: 1, height: 40).foregroundColor(.blue)
@@ -80,7 +80,7 @@ struct PreciseSliderView: View {
                 }
                 .onEnded { gesture in
                     viewModel.animateMomentum(byValue: (gesture.translation.width - gesture.predictedEndTranslation.width) / viewModel.scale)
-                    
+
                     viewModel.editingValueEnded()
                 }
         )
@@ -102,30 +102,30 @@ struct PreciseSliderView: View {
         // TODO: Zastavení animace jinými gesty
     }
     
-    private func getUnitLabel(ofIndex index: Int) -> Text {
-        let unitValue = viewModel.getUnitValue(ofIndex: index)
+    private func unitLabel(forIndex index: Int) -> Text {
+        let unitValue = viewModel.unitValue(forIndex: index)
         
-        if let label = dataSource?.preciseSliderUnitLabel(value: unitValue) {
+        if let label = dataSource?.unitLabel(forValue: unitValue) {
             return label
         }
         else {
-            return getDefaultUnitLabel(ofIndex: index)
+            return defaultUnitLabel(forIndex: index)
         }
     }
     
-    private func getDefaultUnitLabel(ofIndex index: Int) -> Text {
+    private func defaultUnitLabel(forIndex index: Int) -> Text {
         if viewModel.truncScale > 3.0 ||
-            viewModel.getRelativeIndex(ofIndex: index) % 5 == 0 {
-            return Text(String(viewModel.getUnitValue(ofIndex: index)))
+            viewModel.relativeIndex(forIndex: index) % 5 == 0 {
+            return Text(String(viewModel.unitValue(forIndex: index)))
         }
         //
         return Text("")
     }
     
-    private func getUnitColor(ofIndex index: Int) -> Color {
-        return dataSource?.preciseSliderUnitColor(
-            value: viewModel.getUnitValue(ofIndex: index),
-            relativeIndex: viewModel.getRelativeIndex(ofIndex: index)
+    private func unitColor(forIndex index: Int) -> Color {
+        return dataSource?.unitColor(
+            forValue: viewModel.unitValue(forIndex: index),
+            forIndex: viewModel.relativeIndex(forIndex: index)
         ) ?? .white
     }
 }
