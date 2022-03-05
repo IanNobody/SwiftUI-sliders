@@ -10,8 +10,6 @@ import SwiftUI
 struct PreciseAxis2DView: View {
     @ObservedObject var viewModel: PreciseAxis2DViewModel
     
-    let defaultUnitWidth = 10
-    
     init(viewModel: PreciseAxis2DViewModel) {
         self.viewModel = viewModel
     }
@@ -34,19 +32,17 @@ struct PreciseAxis2DView: View {
                         .frame(
                             width: 1,
                             // TODO: Dynamická velikost jednotky
-                            height: viewModel.unitHeight(forIndex: index)
+                            height: unitHeight(forIndex: index, withFrameWidth: geometry.size.width)
                         )
                         .foregroundColor(.white)
                         .offset(
                             x: normalizedOffset(
                                 fromOffset: viewModel.unitOffset(forIndex: index),
                                 withWidth: geometry.size.width
-                            ) + widthCorrectionOffset(
-                                fromWidth: geometry.size.width
                             ),
                             y: viewModel.active ?
                                 // TODO: Má tato konstanta opodstatnění?
-                                -2.5 :
+                                2.5 :
                                 .zero
                         )
                 }
@@ -54,8 +50,8 @@ struct PreciseAxis2DView: View {
                     width: geometry.size.width,
                     height: axisHeight(fromFrameWidth: geometry.size.width),
                     alignment: viewModel.active ?
-                        .bottomLeading :
-                        .leading
+                        .top :
+                        .center
                 )
                 //
                 Rectangle()
@@ -74,7 +70,7 @@ struct PreciseAxis2DView: View {
                     .onChanged { gesture in
                         viewModel.interruptAnimation()
                         
-                        viewModel.value = viewModel.prevValue - (gesture.translation.width / viewModel.scale)
+                        viewModel.move(byValue: gesture.translation.width)
                         
                         // Roztažení osy
                         withAnimation(.easeInOut) {
@@ -105,6 +101,7 @@ struct PreciseAxis2DView: View {
         }
     }
     
+    // TODO: Stejný kód je i v 1D slideru, musí se opakovat?
     private func maximumUnitOffset(fromWidth width: CGFloat) -> CGFloat {
         return CGFloat(numberOfUnits(fromWidth: width)) * viewModel.designUnit
     }
@@ -112,19 +109,21 @@ struct PreciseAxis2DView: View {
     private func normalizedOffset(fromOffset offset: CGFloat, withWidth width: CGFloat) -> CGFloat {
         let max = maximumUnitOffset(fromWidth: width)
         
+        let scaleCorrection = viewModel.designUnit * CGFloat(middleIndex(fromWidth: width))
+        
         if offset > max {
-            return offset.truncatingRemainder(dividingBy: max)
+            return (offset.truncatingRemainder(dividingBy: max) - scaleCorrection)
         }
         
         if offset < 0 {
-            return max + offset.truncatingRemainder(dividingBy: max)
+            return max + (offset.truncatingRemainder(dividingBy: max) - scaleCorrection)
         }
         
-        return offset
+        return (offset - scaleCorrection)
     }
     
     private func numberOfUnits(fromWidth width: CGFloat) -> Int {
-        let num = Int(ceil(width / CGFloat(defaultUnitWidth)))
+        let num = Int(ceil(width / CGFloat(viewModel.defaultStep)))
         
         // Zaokrouhlení k nejbližšímu vyššímu násobku 5
         // (5 = počet dílků jedné jednotky)
@@ -140,7 +139,7 @@ struct PreciseAxis2DView: View {
     }
     
     private func middleIndex(fromWidth width: CGFloat) -> Int {
-        return Int(numberOfUnits(fromWidth: width) / 2) + 1
+        return Int(numberOfUnits(fromWidth: width) / 2)
     }
     
     private func axisHeight(fromFrameWidth frame: CGFloat) -> CGFloat {
@@ -152,11 +151,26 @@ struct PreciseAxis2DView: View {
         }
     }
     
-    // Funkce pro korekci odchylky způsobené rozdílem počtu jednotek a šířky samotné osy
-    private func widthCorrectionOffset(fromWidth width: CGFloat) -> CGFloat {
-        let units = numberOfUnits(fromWidth: width)
+    // Index jednotky s ohledem na zvolenou hodnotu
+    public func relativeIndex(forIndex index: Int, withWidth width: CGFloat) -> Int {
         
-        return (width - CGFloat((units * defaultUnitWidth))) / 2
+        let indexOffset = index - Int(viewModel.value / viewModel.unit)
+        
+        // Zaokrouhlení k nejbližšímu nižšímu násobku celkového počtu jednotek
+        let roundedOffset = Int(floor(
+            Float(indexOffset)
+            / Float(numberOfUnits(fromWidth: width))
+        )) * numberOfUnits(fromWidth: width)
+
+        return index - roundedOffset
+    }
+    
+    func unitHeight(forIndex index: Int, withFrameWidth width: CGFloat) -> CGFloat {
+        let height = axisHeight(fromFrameWidth: width)
+            * viewModel.unitHeightRatio(forIndex: relativeIndex(forIndex: index, withWidth: width))
+            * 0.8
+        
+        return viewModel.active ? height/2 : height
     }
 }
 

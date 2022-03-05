@@ -53,22 +53,12 @@ class PreciseSliderViewModel: ObservableObject {
     }
     
     public var isInfinite: Bool {
-        dataSource?.isFinite ?? true
-    }
-    
-    // Počet jednotek osy
-    // TODO: Implementovat dynamiku v závislosti na rozměrech
-    public var numberOfUnits: Int = 41
-    
-    private let maxUnitHeight: CGFloat = 25.0
-    
-    // Index středu osy
-    public var middleIndex: Int {
-        (numberOfUnits / 2) + 1
+        dataSource?.isFinite ?? false
     }
     
     // Výchozí vzdálenost mezi jednotkami
-    private let defaultStep: CGFloat = 10.0
+    
+    public let defaultStep: CGFloat = 10.0
     
     public var truncScale: Double {
         scale / scaleBase
@@ -91,15 +81,30 @@ class PreciseSliderViewModel: ObservableObject {
     
     // Posuv osy v rámci jedné jednotky
     public var offset: CGFloat {
-        var truncValue = value.truncatingRemainder(dividingBy: unit)
+        (value / unit) * designUnit
+    }
+    
+    //
+    
+    public func move(byValue difference: CGFloat) {
+        let newValue = prevValue - (difference / scale)
         
-        // Oprava nepřesností
-        if (unit - truncValue) < (unit / 1000) {
-            truncValue = 0
+        if !isInfinite && (newValue < minValue || newValue > maxValue) {
+            value = newValue < minValue ?
+                minValue : maxValue
         }
-
-        // Transformace do báze vizualizace
-        return (truncValue / unit) * designUnit
+        else {
+            value = newValue
+        }
+    }
+    
+    public func unitHeightRatio(forIndex index: Int) -> CGFloat {
+        if index % 5 != 0 {
+            let height = (truncScale - 1) / 3
+            return height < 1 ? height : 1
+        }
+        //
+        return 1
     }
     
     //
@@ -144,47 +149,12 @@ class PreciseSliderViewModel: ObservableObject {
         prevScale = scale
     }
     
-    public func unitHeight(forIndex index: Int) -> CGFloat {
-        if relativeIndex(forIndex: index) % 5 != 0 {
-            let height = (truncScale - 1) / 3 * maxUnitHeight
-            return height < maxUnitHeight ? height : maxUnitHeight
-        }
-        //
-        return maxUnitHeight
-    }
-    
-    public func unitVisibility(ofIndex index: Int) -> Bool {
-        if (unitValue(forIndex: index) > maxValue ||
-            unitValue(forIndex: index) < minValue) &&
-            !isInfinite {
-            return false
-        }
-        else {
-            return true
-        }
-    }
-    
-    public func relativeIndex(forIndex index: Int) -> Int {
-        return index
-            + Int((value / unit).truncatingRemainder(dividingBy: 5))
-            - Int(middleIndex % 5)
-    }
-    
-    public func unitOffset(forIndex index: Int) -> CGSize {
+    public func unitOffset(forIndex index: Int) -> CGFloat {
         let offset = (
             (CGFloat(index) * designUnit)
-            - (CGFloat(middleIndex) * designUnit)
             - offset
         )
         
-        return .init(width: offset, height: .zero)
-    }
-        
-    public func unitValue(forIndex index: Int) -> Double {
-        return (
-            value
-            - (offset / designUnit * unit)
-            + (unit * Double(index - middleIndex))
-        )
+        return offset
     }
 }
