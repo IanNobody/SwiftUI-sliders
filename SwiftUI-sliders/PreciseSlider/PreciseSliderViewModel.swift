@@ -11,7 +11,11 @@ import SwiftUI
 class PreciseSliderViewModel: ObservableObject {
     @Published var value: Double = Double.zero {
         didSet {
-            delegate?.valueDidChange(value: value)
+            if value != oldValue {
+                delegate?.valueDidChange(
+                    value: cropToBoundaries(value: value)
+                )
+            }
         }
     }
     
@@ -23,10 +27,6 @@ class PreciseSliderViewModel: ObservableObject {
     
     public var prevValue: Double = Double.zero
     public var prevScale: Double = 1.0
-    
-    // Proměnné pro řízení animované setrvačnosti osy
-    private var destValue: Double = Double.zero
-    private var animationTimer: Timer?
     
     public var dataSource: PreciseSliderDataSource? {
         didSet {
@@ -57,7 +57,6 @@ class PreciseSliderViewModel: ObservableObject {
     }
     
     // Výchozí vzdálenost mezi jednotkami
-    
     public let defaultStep: CGFloat = 10.0
     
     public var truncScale: Double {
@@ -79,62 +78,57 @@ class PreciseSliderViewModel: ObservableObject {
         CGFloat(defaultStep) * truncScale
     }
     
-    // Posuv osy v rámci jedné jednotky
-    public var offset: CGFloat {
-        (value / unit) * designUnit
-    }
-    
     //
+    
+    private func cropToBoundaries(value: CGFloat) -> CGFloat {
+        if !isInfinite && (value < minValue || value > maxValue) {
+            return value < minValue ? minValue : maxValue
+        }
+        else {
+            return value
+        }
+    }
     
     public func move(byValue difference: CGFloat) {
-        let newValue = prevValue - (difference / scale)
+        var newValue = prevValue - (difference / scale)
         
-        if !isInfinite && (newValue < minValue || newValue > maxValue) {
-            value = newValue < minValue ?
-                minValue : maxValue
+        if (newValue > maxValue || newValue < minValue) && !isInfinite {
+            let difference = newValue - (newValue > maxValue ? maxValue : minValue)
+            
+            newValue = newValue > maxValue ?
+                maxValue + pow(abs(difference), 1/2) :
+                minValue - pow(abs(difference), 1/2)
+        }
+        
+        value = newValue
+    }
+    
+    public func animateMomentum(byValue difference: CGFloat, duration: CGFloat) {
+        let newValue = value - (difference / scale)
+        
+        if value > minValue && value < maxValue &&
+            newValue > minValue && newValue < maxValue
+            && !isInfinite {
+            withAnimation(.easeOut(duration: duration)) {
+                value = newValue
+                prevValue = newValue
+            }
+        }
+        else if value > minValue && value < maxValue
+                && !isInfinite {
+            withAnimation(.easeOut(duration: duration)) {
+                move(byValue: difference)
+                editingValueEnded()
+            }
+            withAnimation(.spring()) {
+                value = newValue > maxValue ? maxValue : minValue
+                prevValue = newValue > maxValue ? maxValue : minValue
+            }
         }
         else {
-            value = newValue
-        }
-    }
-    
-    public func unitHeightRatio(forIndex index: Int) -> CGFloat {
-        if index % 5 != 0 {
-            let height = (truncScale - 1) / 3
-            return height < 1 ? height : 1
-        }
-        //
-        return 1
-    }
-    
-    //
-    
-    public func animateMomentum(byValue difference: Double) {
-        destValue = value + difference
-        animationTimer = Timer.scheduledTimer(
-            // TODO: Zajistit dynamiku
-            timeInterval: 1/60,
-            target: self,
-            selector: #selector(makeAnimationStep),
-            userInfo: nil,
-            repeats: true
-        )
-    }
-    
-    @objc private func makeAnimationStep() {
-        if abs(destValue - value) < (unit / designUnit) {
-            interruptAnimation()
-        }
-        else {
-            value += (destValue - value) / 10
-            prevValue = value
-        }
-    }
-    
-    public func interruptAnimation() {
-        if animationTimer != nil {
-            if animationTimer?.isValid == true {
-                animationTimer?.invalidate()
+            withAnimation(.spring()) {
+                value = value > maxValue ? maxValue : minValue
+                prevValue = value > maxValue ? maxValue : minValue
             }
         }
     }
@@ -147,14 +141,5 @@ class PreciseSliderViewModel: ObservableObject {
     
     public func editingScaleEnded() {
         prevScale = scale
-    }
-    
-    public func unitOffset(forIndex index: Int) -> CGFloat {
-        let offset = (
-            (CGFloat(index) * designUnit)
-            - offset
-        )
-        
-        return offset
     }
 }

@@ -1,13 +1,13 @@
 //
-//  PreciseAxisView.swift
+//  PreciseSliderAxisView.swift
 //  SwiftUI-sliders
 //
-//  Created by Šimon Strýček on 16.02.2022.
+//  Created by Šimon Strýček on 07.03.2022.
 //
 
 import SwiftUI
 
-struct PreciseAxis2DView: View, Animatable {
+struct PreciseSliderAxisView: View, Animatable {
     let maxValue: CGFloat
     let minValue: CGFloat
     
@@ -20,9 +20,8 @@ struct PreciseAxis2DView: View, Animatable {
     let designUnit: CGFloat
     let unit: CGFloat
     let isInfinite: Bool
-    let active: Bool
     
-    init(maxValue: CGFloat, minValue: CGFloat, value: CGFloat, truncScale: CGFloat, designUnit: CGFloat, unit: CGFloat, isInfinite: Bool, isActive: Bool) {
+    init(maxValue: CGFloat, minValue: CGFloat, value: CGFloat, truncScale: CGFloat, designUnit: CGFloat, unit: CGFloat, isInfinite: Bool) {
         self.maxValue = maxValue
         self.minValue = minValue
         self.animatableData = value
@@ -30,63 +29,49 @@ struct PreciseAxis2DView: View, Animatable {
         self.designUnit = designUnit
         self.unit = unit
         self.isInfinite = isInfinite
-        self.active = isActive
     }
     
+    // TODO: Vyřešit nekonečnost osy (aktuálně hrozí přetečení relativního indexu)
     var body: some View {
         GeometryReader { geometry in
             ZStack {
+                // Pozadí
                 Rectangle()
-                    .frame(
-                        width: geometry.size.width,
-                        height: axisHeight(
-                            fromFrameWidth: geometry.size.width
-                        ),
-                        alignment: .leading)
+                    // TODO: Volitelná barva pozadí
                     .foregroundColor(.black)
                 //
-                ForEach(0..<numberOfUnits(fromWidth: geometry.size.width), id: \.self) { index in
-                    //
-                    Rectangle()
-                        .frame(
-                            width: 1,
-                            height: unitHeight(forIndex: index, withFrameWidth: geometry.size.width)
-                        )
-                        .foregroundColor(.white)
-                        .offset(
-                            x: normalizedOffset(
-                                fromOffset: unitOffset(forIndex: index),
-                                withWidth: geometry.size.width
-                            ),
-                            y: active ?
-                                // TODO: Má tato konstanta opodstatnění?
-                                2.5 :
-                                .zero
-                        )
+                ForEach(0..<numberOfUnits(fromWidth: geometry.size.width)) { index in
+                    ZStack {
+                        if isUnitVisible(ofIndex: index, withWidth: geometry.size.width)
+                        {
+                            Rectangle()
+                                .frame(width: 1, height: unitHeight(forIndex: index, withWidth: geometry.size.width), alignment: .leading)
+                                // TODO: Volitelná barva jednotek
+                                .foregroundColor(.white)
+                            //
+                            unitLabel(forIndex: index, withWidth: geometry.size.width)
+                                .background(Color.black)
+                                .font(Font.system(size:7, design: .rounded))
+                                .foregroundColor(.white)
+                                .frame(width:
+                                        truncScale < 1.15 ?
+                                       5 * designUnit :
+                                        (truncScale < 3.0 ? designUnit * 2 : designUnit),
+                                       height: 15)
+                        }
+                    }.offset(x: normalizedOffset(fromOffset: unitOffset(forIndex: index), withWidth: geometry.size.width))
                 }
-                .frame(
-                    width: geometry.size.width,
-                    height: axisHeight(fromFrameWidth: geometry.size.width),
-                    alignment: active ?
-                        .top :
-                        .center
-                )
-                //
-                Rectangle()
-                    .frame(
-                        width: 1,
-                        height: axisHeight(
-                            fromFrameWidth: geometry.size.width
-                        ) * 0.8,
-                        alignment: .center
-                    )
-                    // TODO: Nastavitelná barva
-                    .foregroundColor(.blue)
+                // Středový bod
+                Rectangle().frame(width: 1, height: 40).foregroundColor(.blue)
             }
+            .frame(
+                width: geometry.size.width,
+                height: geometry.size.width / 8
+            )
         }
+        .clipShape(Rectangle())
     }
     
-    // TODO: Musí se tenhle kód v každém -AxisView opakovat?
     public func unitOffset(forIndex index: Int) -> CGFloat {
         let offset = (
             (CGFloat(index) * designUnit)
@@ -154,8 +139,25 @@ struct PreciseAxis2DView: View, Animatable {
         return (offset - scaleCorrection)
     }
     
+    public func unitHeightRatio(forIndex index: Int) -> CGFloat {
+        if index % 5 != 0 {
+            let height = (truncScale - 1) / 3
+            return height < 1 ? height : 1
+        }
+        //
+        return 1
+    }
+    
+    private func axisHeight(fromFrameWidth frame: CGFloat) -> CGFloat {
+        return frame / 6
+    }
+    
     private func maxUnitHeight(fromWidth width: CGFloat) -> CGFloat {
         return axisHeight(fromFrameWidth: width) / 2
+    }
+    
+    public func unitHeight(forIndex index: Int, withWidth width: CGFloat) -> CGFloat {
+        return unitHeightRatio(forIndex: relativeIndex(forIndex: index, withWidth: width)) * maxUnitHeight(fromWidth: width)
     }
     
     public func isUnitVisible(ofIndex index: Int, withWidth width: CGFloat) -> Bool {
@@ -188,36 +190,10 @@ struct PreciseAxis2DView: View, Animatable {
         //
         return Text("")
     }
-    
-    private func axisHeight(fromFrameWidth frame: CGFloat) -> CGFloat {
-        if active {
-            return frame / 10
-        }
-        else {
-            return frame / 20
-        }
-    }
-    
-    public func unitHeightRatio(forIndex index: Int) -> CGFloat {
-        if index % 5 != 0 {
-            let height = (truncScale - 1) / 3
-            return height < 1 ? height : 1
-        }
-        //
-        return 1
-    }
-    
-    func unitHeight(forIndex index: Int, withFrameWidth width: CGFloat) -> CGFloat {
-        let height = axisHeight(fromFrameWidth: width)
-            * unitHeightRatio(forIndex: relativeIndex(forIndex: index, withWidth: width))
-            * 0.8
-        
-        return active ? height/2 : height
-    }
 }
 
-struct PreciseAxis2DView_Previews: PreviewProvider {
+struct PreciseSliderAxisView_Previews: PreviewProvider {
     static var previews: some View {
-        PreciseAxis2DView(maxValue: 1000, minValue: -1000, value: 0.0, truncScale: 1.0, designUnit: 10.0, unit: 10.0, isInfinite: false, isActive: false)
+        PreciseSliderAxisView(maxValue: 1000.0, minValue: -1000.0, value: 0, truncScale: 1.0, designUnit: 10.0, unit: 10.0, isInfinite: false)
     }
 }

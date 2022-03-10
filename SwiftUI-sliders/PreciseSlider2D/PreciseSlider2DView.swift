@@ -37,19 +37,16 @@ struct PreciseSlider2D: View {
                 .gesture(
                     DragGesture()
                         .onChanged { gesture in
-                            axisX.interruptAnimation()
-                            axisY.interruptAnimation()
-                            
-                            axisX.value = axisX.prevValue + (gesture.translation.width / axisX.scale)
-                            axisY.value = axisY.prevValue - (gesture.translation.height / axisY.scale)
+                            axisX.move(byValue: -gesture.translation.width)
+                            axisY.move(byValue: gesture.translation.height)
                         }
                         .onEnded { gesture in
+                            axisX.animateMomentum(byValue: gesture.translation.width - gesture.predictedEndTranslation.width, duration: 1)
+                            
+                            axisY.animateMomentum(byValue: gesture.predictedEndTranslation.height - gesture.translation.height, duration: 1)
+                            
                             axisX.editingValueEnded()
                             axisY.editingValueEnded()
-                            
-                            axisX.animateMomentum(byValue: (gesture.predictedEndTranslation.width - gesture.translation.width) / axisX.scale)
-                            
-                            axisY.animateMomentum(byValue: (gesture.translation.height - gesture.predictedEndTranslation.height) / axisY.scale)
                         }
                 )
                 .gesture(
@@ -70,12 +67,50 @@ struct PreciseSlider2D: View {
                 
                 
                 // Osa Y
-                PreciseAxis2DView(viewModel: axisY)
+                PreciseAxis2DView(maxValue: axisY.maxValue, minValue: axisY.minValue, value: axisY.value, truncScale: axisY.truncScale, designUnit: axisY.designUnit, unit: axisY.unit, isInfinite: axisY.isInfinite, isActive: axisY.active)
                     .rotationEffect(.degrees(90))
+                    .gesture(
+                        DragGesture()
+                            .onChanged { gesture in
+                                axisY.activeMove(byValue: gesture.translation.height)
+                            }
+                            .onEnded { gesture in
+                                axisY.animateMomentum(byValue: (gesture.predictedEndTranslation.height - gesture.translation.height), duration: 0.5)
+
+                                axisY.editingValueEnded()
+                            }
+                    )
+                    .gesture(
+                        MagnificationGesture()
+                            .onChanged { gesture in
+                                let newScale = axisY.prevScale * gesture.magnitude
+                                
+                                axisY.scale = newScale > 1.0 ? newScale : 1.0
+                            }
+                    )
                 
                 // Osa X
-                PreciseAxis2DView(viewModel: axisX)
-                    .rotationEffect(.degrees(180))
+                PreciseAxis2DView(maxValue: axisX.maxValue, minValue: axisX.minValue, value: axisX.value, truncScale: axisX.truncScale, designUnit: axisX.designUnit, unit: axisX.unit, isInfinite: axisX.isInfinite, isActive: axisX.active)
+                    .rotationEffect(.degrees(-180))
+                    .gesture(
+                        DragGesture()
+                            .onChanged { gesture in
+                                axisX.activeMove(byValue: -gesture.translation.width)
+                            }
+                            .onEnded { gesture in
+                                axisX.animateMomentum(byValue: (gesture.predictedEndTranslation.width - gesture.translation.width), duration: 0.5)
+
+                                axisX.editingValueEnded()
+                            }
+                    )
+                    .gesture(
+                        MagnificationGesture()
+                            .onChanged { gesture in
+                                let newScale = axisX.prevScale * gesture.magnitude
+                                
+                                axisX.scale = newScale > 1.0 ? newScale : 1.0
+                            }
+                    )
                 
                 Rectangle()
                     .frame(width:

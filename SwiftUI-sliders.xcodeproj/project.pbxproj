@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		D113EB2227D66A9900F3237F /* PreciseSliderAxisView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D113EB2127D66A9900F3237F /* PreciseSliderAxisView.swift */; };
 		D13FB91A27BC278D007F281E /* PreciseSlider2DView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D13FB91927BC278D007F281E /* PreciseSlider2DView.swift */; };
 		D13FB91C27BC2838007F281E /* PreciseSlider2DViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = D13FB91B27BC2838007F281E /* PreciseSlider2DViewModel.swift */; };
 		D13FB91E27BCFD2C007F281E /* PreciseAxis2DView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D13FB91D27BCFD2C007F281E /* PreciseAxis2DView.swift */; };
@@ -20,6 +21,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		D113EB2127D66A9900F3237F /* PreciseSliderAxisView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PreciseSliderAxisView.swift; sourceTree = "<group>"; };
 		D13FB91927BC278D007F281E /* PreciseSlider2DView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PreciseSlider2DView.swift; sourceTree = "<group>"; };
 		D13FB91B27BC2838007F281E /* PreciseSlider2DViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PreciseSlider2DViewModel.swift; sourceTree = "<group>"; };
 		D13FB91D27BCFD2C007F281E /* PreciseAxis2DView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PreciseAxis2DView.swift; sourceTree = "<group>"; };
@@ -51,6 +53,7 @@
 				D1B8821827B69CCE003351A0 /* PreciseSliderDataSource.swift */,
 				D1B8821A27B6A7B6003351A0 /* PreciseSliderViewModel.swift */,
 				D1B8822027B7F60C003351A0 /* PreciseSliderDelegate.swift */,
+				D113EB2127D66A9900F3237F /* PreciseSliderAxisView.swift */,
 			);
 			path = PreciseSlider;
 			sourceTree = "<group>";
@@ -178,6 +181,7 @@
 				D1B8822127B7F60C003351A0 /* PreciseSliderDelegate.swift in Sources */,
 				D13FB91E27BCFD2C007F281E /* PreciseAxis2DView.swift in Sources */,
 				D1B8821B27B6A7B6003351A0 /* PreciseSliderViewModel.swift in Sources */,
+				D113EB2227D66A9900F3237F /* PreciseSliderAxisView.swift in Sources */,
 				D1B8821927B69CCE003351A0 /* PreciseSliderDataSource.swift in Sources */,
 				D13FB91A27BC278D007F281E /* PreciseSlider2DView.swift in Sources */,
 				D1C33C4F27A7DC5F00A73AEB /* SwiftUI_sliders.docc in Sources */,
