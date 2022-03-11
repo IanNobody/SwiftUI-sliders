@@ -9,52 +9,20 @@ import Foundation
 import SwiftUI
 
 class PreciseSliderViewModel: ObservableObject {
-    @Published var value: Double = Double.zero {
-        didSet {
-            if value != oldValue {
-                delegate?.valueDidChange(
-                    value: cropToBoundaries(value: value)
-                )
-            }
-        }
-    }
-    
-    @Published var scale: Double = 1.0 {
-        didSet {
-            delegate?.scaleDidChange(scale: scale)
-        }
-    }
+    @Published var value: Double = Double.zero
+    @Published var scale: Double = 1.0
     
     public var prevValue: Double = Double.zero
     public var prevScale: Double = 1.0
     
-    public var dataSource: PreciseSliderDataSource? {
-        didSet {
-            value = dataSource?.initialValue ?? Double.zero
-            prevValue = value
-            //
-            scale = dataSource?.initialScale ?? 1.0
-            prevScale = scale
-        }
-    }
-    
-    public var delegate: PreciseSliderDelegate?
-    
-    private let defaultMaxValue: Double = 1000.0
-    private let defaultMinValue: Double = -1000.0
-    
     // Meze posuvníku
-    public var maxValue: Double {
-        dataSource?.maximumValue ?? defaultMaxValue
-    }
+    public var maxValue: Double = 150 // Výchozí meze
+    public var minValue: Double = -150
     
-    public var minValue: Double {
-        dataSource?.minimumValue ?? defaultMinValue
-    }
+    public var maxScale: Double = .infinity
+    public var minScale: Double = 1.0
     
-    public var isInfinite: Bool {
-        dataSource?.isFinite ?? false
-    }
+    public var isInfinite: Bool = false
     
     // Výchozí vzdálenost mezi jednotkami
     public let defaultStep: CGFloat = 10.0
@@ -101,6 +69,34 @@ class PreciseSliderViewModel: ObservableObject {
         }
         
         value = newValue
+    }
+    
+    public func move(toValue newValue: CGFloat) {
+        if newValue > maxValue {
+            value = maxValue
+        }
+        else if newValue < minValue {
+            value = minValue
+        }
+        else {
+            value = newValue
+        }
+        
+        editingValueEnded()
+    }
+    
+    public func zoom(byScale zoom: CGFloat) {
+        var newScale = prevScale * zoom
+        
+        if newScale > maxScale {
+           newScale = maxScale
+        }
+        
+        if newScale < minScale {
+            newScale = minScale
+        }
+        
+        scale = newScale
     }
     
     public func animateMomentum(byValue difference: CGFloat, duration: CGFloat) {

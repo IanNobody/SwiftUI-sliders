@@ -50,8 +50,8 @@ struct PreciseSliderAxisView: View, Animatable {
                                 .foregroundColor(.white)
                             //
                             unitLabel(forIndex: index, withWidth: geometry.size.width)
-                                .background(Color.black)
-                                .font(Font.system(size:7, design: .rounded))
+                                .background(.black)
+                                .font(.system(size:7, design: .rounded))
                                 .foregroundColor(.white)
                                 .frame(width:
                                         truncScale < 1.15 ?

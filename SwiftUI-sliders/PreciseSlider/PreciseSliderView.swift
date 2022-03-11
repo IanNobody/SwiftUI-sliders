@@ -32,10 +32,7 @@ struct PreciseSliderView: View {
         .gesture(
             MagnificationGesture()
                 .onChanged { gesture in
-                    let newScale = viewModel.prevScale * gesture.magnitude
-                    
-                    // Ošetření minimální hodnoty
-                    viewModel.scale = newScale > 1 ? newScale : 1.0
+                    viewModel.zoom(byScale: gesture.magnitude)
                 }
                 .onEnded { _ in
                     viewModel.editingScaleEnded()
