@@ -6,13 +6,8 @@
 //
 
 import Foundation
+import SwiftUI
 
 class PreciseSlider2DViewModel: ObservableObject {
-    @Published var valueX: Double = Double.zero
-    @Published var valueY: Double = Double.zero
     
-    @Published var scaleX: Double = 1.0
-    @Published var scaleY: Double = 1.0
-    
-    public let numberOfUnits: Int = 30
 }

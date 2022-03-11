@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-struct PreciseAxis2DView: View, Animatable {
+struct PreciseAxis2DView<ValueLabel:View>: View, Animatable {
     let maxValue: CGFloat
     let minValue: CGFloat
     
@@ -22,7 +22,9 @@ struct PreciseAxis2DView: View, Animatable {
     let isInfinite: Bool
     let active: Bool
     
-    init(maxValue: CGFloat, minValue: CGFloat, value: CGFloat, truncScale: CGFloat, designUnit: CGFloat, unit: CGFloat, isInfinite: Bool, isActive: Bool) {
+    @ViewBuilder let valueLabel: ((_ forValue: Double) -> ValueLabel)?
+    
+    init(maxValue: CGFloat, minValue: CGFloat, value: CGFloat, truncScale: CGFloat, designUnit: CGFloat, unit: CGFloat, isInfinite: Bool, isActive: Bool, valueLabel: ((_ forValue: Double) -> ValueLabel)?) {
         self.maxValue = maxValue
         self.minValue = minValue
         self.animatableData = value
@@ -31,6 +33,7 @@ struct PreciseAxis2DView: View, Animatable {
         self.unit = unit
         self.isInfinite = isInfinite
         self.active = isActive
+        self.valueLabel = valueLabel
     }
     
     var body: some View {
@@ -40,33 +43,60 @@ struct PreciseAxis2DView: View, Animatable {
                     .frame(
                         width: geometry.size.width,
                         height: axisHeight(
-                            fromFrameWidth: geometry.size.width
+                            fromFrameHeight: geometry.size.height
                         ),
                         alignment: .leading)
                     .foregroundColor(.black)
                 //
                 ForEach(0..<numberOfUnits(fromWidth: geometry.size.width), id: \.self) { index in
                     //
-                    Rectangle()
-                        .frame(
-                            width: 1,
-                            height: unitHeight(forIndex: index, withFrameWidth: geometry.size.width)
-                        )
-                        .foregroundColor(.white)
+                    if isUnitVisible(ofIndex: index, withWidth: geometry.size.width) {
+                        ZStack {
+                            VStack {
+                                Rectangle()
+                                    .frame(
+                                        width: 1,
+                                        height: unitHeight(forIndex: index, withFrameSize: geometry.size)
+                                    )
+                                    .foregroundColor(.white)
+                                if active && relativeIndex(forIndex: index, withWidth: geometry.size.width) % 5 == 0 {
+                                    valueLabel?(unitValue(forIndex: index, withWidth: geometry.size.width))
+                                    .frame(
+                                        width:
+                                            truncScale < 1.15 ?
+                                                5 * designUnit :
+                                                (
+                                                    truncScale < 3.0 ?
+                                                    designUnit * 2 :       designUnit
+                                                ),
+                                        height:
+                                            axisHeight(
+                                                fromFrameHeight: geometry.size.height
+                                            )
+                                            - unitHeight(
+                                                forIndex: index,
+                                                withFrameSize:  geometry.size
+                                            ),
+                                        alignment: .top
+                                    )
+                                }
+                            }
+                        }
                         .offset(
                             x: normalizedOffset(
-                                fromOffset: unitOffset(forIndex: index),
+                                fromOffset:        unitOffset(forIndex: index),
                                 withWidth: geometry.size.width
                             ),
                             y: active ?
-                                // TODO: Má tato konstanta opodstatnění?
+                            // TODO: Má tato konstanta opodstatnění?
                                 2.5 :
-                                .zero
+                                    .zero
                         )
+                    }
                 }
                 .frame(
                     width: geometry.size.width,
-                    height: axisHeight(fromFrameWidth: geometry.size.width),
+                    height: axisHeight(fromFrameHeight: geometry.size.height),
                     alignment: active ?
                         .top :
                         .center
@@ -76,7 +106,7 @@ struct PreciseAxis2DView: View, Animatable {
                     .frame(
                         width: 1,
                         height: axisHeight(
-                            fromFrameWidth: geometry.size.width
+                            fromFrameHeight: geometry.size.height
                         ) * 0.8,
                         alignment: .center
                     )
@@ -154,8 +184,8 @@ struct PreciseAxis2DView: View, Animatable {
         return (offset - scaleCorrection)
     }
     
-    private func maxUnitHeight(fromWidth width: CGFloat) -> CGFloat {
-        return axisHeight(fromFrameWidth: width) / 2
+    private func maxUnitHeight(fromHeight height: CGFloat) -> CGFloat {
+        return axisHeight(fromFrameHeight: height) / 2
     }
     
     public func isUnitVisible(ofIndex index: Int, withWidth width: CGFloat) -> Bool {
@@ -169,27 +199,13 @@ struct PreciseAxis2DView: View, Animatable {
         }
     }
     
-    // TODO: Custom label
-    private func unitLabel(forIndex index: Int, withWidth width: CGFloat) -> Text {
-        return defaultUnitLabel(forIndex: index, withWidth: width)
-    }
-    
     public func unitValue(forIndex index: Int, withWidth width: CGFloat) -> Double {
         return (
             (unit * Double(relativeIndex(forIndex: index, withWidth: width) - middleIndex(fromWidth: width)))
         )
     }
     
-    private func defaultUnitLabel(forIndex index: Int, withWidth width: CGFloat) -> Text {
-        if truncScale > 3.0 ||
-            relativeIndex(forIndex: index, withWidth: width) % 5 == 0 {
-            return Text(String(unitValue(forIndex: index, withWidth: width)))
-        }
-        //
-        return Text("")
-    }
-    
-    private func axisHeight(fromFrameWidth frame: CGFloat) -> CGFloat {
+    private func axisHeight(fromFrameHeight frame: CGFloat) -> CGFloat {
         if active {
             return frame / 10
         }
@@ -207,9 +223,9 @@ struct PreciseAxis2DView: View, Animatable {
         return 1
     }
     
-    func unitHeight(forIndex index: Int, withFrameWidth width: CGFloat) -> CGFloat {
-        let height = axisHeight(fromFrameWidth: width)
-            * unitHeightRatio(forIndex: relativeIndex(forIndex: index, withWidth: width))
+    func unitHeight(forIndex index: Int, withFrameSize frame: CGSize) -> CGFloat {
+        let height = axisHeight(fromFrameHeight: frame.height)
+        * unitHeightRatio(forIndex: relativeIndex(forIndex: index, withWidth: frame.width))
             * 0.8
         
         return active ? height/2 : height
@@ -218,6 +234,13 @@ struct PreciseAxis2DView: View, Animatable {
 
 struct PreciseAxis2DView_Previews: PreviewProvider {
     static var previews: some View {
-        PreciseAxis2DView(maxValue: 1000, minValue: -1000, value: 0.0, truncScale: 1.0, designUnit: 10.0, unit: 10.0, isInfinite: false, isActive: false)
+        PreciseAxis2DView(maxValue: 1000, minValue: -1000, value: 0.0, truncScale: 1.0, designUnit: 10.0, unit: 10.0, isInfinite: false, isActive: true, valueLabel: { value in
+                Text("\(Int(value))")
+                .foregroundColor(.white)
+                .font(
+                    .system(size: 7, design: .rounded)
+                )
+            }
+        )
     }
 }
