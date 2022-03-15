@@ -16,8 +16,8 @@ class PreciseSliderViewModel: ObservableObject {
     public var prevScale: Double = 1.0
     
     // Meze posuvníku
-    public var maxValue: Double = 150 // Výchozí meze
-    public var minValue: Double = -150
+    public var maxValue: Double = 200 // Výchozí meze
+    public var minValue: Double = -200
     
     public var maxScale: Double = .infinity
     public var minScale: Double = 1.0
@@ -25,7 +25,7 @@ class PreciseSliderViewModel: ObservableObject {
     public var isInfinite: Bool = false
     
     // Výchozí vzdálenost mezi jednotkami
-    public let defaultStep: CGFloat = 10.0
+    public let defaultStep: CGFloat = 20.0
     
     public var truncScale: Double {
         scale / scaleBase
@@ -36,6 +36,7 @@ class PreciseSliderViewModel: ObservableObject {
         return pow(5, exponent)
     }
     
+    // TODO: Po přesunutí do View smazat
     // Reálná hodnota zobrazené jednotky
     public var unit: CGFloat {
         Double(defaultStep) / scaleBase
@@ -47,15 +48,6 @@ class PreciseSliderViewModel: ObservableObject {
     }
     
     //
-    
-    private func cropToBoundaries(value: CGFloat) -> CGFloat {
-        if !isInfinite && (value < minValue || value > maxValue) {
-            return value < minValue ? minValue : maxValue
-        }
-        else {
-            return value
-        }
-    }
     
     public func move(byValue difference: CGFloat) {
         var newValue = prevValue - (difference / scale)

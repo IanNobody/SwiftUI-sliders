@@ -16,23 +16,27 @@ struct PreciseAxis2DView<ValueLabel:View>: View, Animatable {
         animatableData
     }
     
+    let minDesignValue: CGFloat
+    let maxDesignValue: CGFloat
+    let unitSize: CGFloat
+    let scaleBase: CGFloat
     let truncScale: CGFloat
-    let designUnit: CGFloat
-    let unit: CGFloat
     let isInfinite: Bool
     let active: Bool
     
     @ViewBuilder let valueLabel: ((_ forValue: Double) -> ValueLabel)?
     
-    init(maxValue: CGFloat, minValue: CGFloat, value: CGFloat, truncScale: CGFloat, designUnit: CGFloat, unit: CGFloat, isInfinite: Bool, isActive: Bool, valueLabel: ((_ forValue: Double) -> ValueLabel)?) {
+    init(maxValue: CGFloat, minValue: CGFloat, value: CGFloat, truncScale: CGFloat, isInfinite: Bool, isActive: Bool, minDesignValue: CGFloat, maxDesignValue: CGFloat, unitSize: CGFloat, scaleBase: CGFloat, valueLabel: ((_ forValue: Double) -> ValueLabel)?) {
         self.maxValue = maxValue
         self.minValue = minValue
         self.animatableData = value
         self.truncScale = truncScale
-        self.designUnit = designUnit
-        self.unit = unit
         self.isInfinite = isInfinite
         self.active = isActive
+        self.minDesignValue = minDesignValue
+        self.maxDesignValue = maxDesignValue
+        self.scaleBase = scaleBase
+        self.unitSize = unitSize
         self.valueLabel = valueLabel
     }
     
@@ -112,11 +116,131 @@ struct PreciseAxis2DView<ValueLabel:View>: View, Animatable {
                     )
                     // TODO: Nastavitelná barva
                     .foregroundColor(.blue)
+                
+                
+                ZStack {
+                    VStack {
+                        Rectangle()
+                            .frame(
+                                width: 1,
+                                height: maxUnitHeight(fromHeight: geometry.size.height)
+                            )
+                            .foregroundColor(.white)
+                        
+                        if active {
+                            valueLabel?(maxValue)
+                            .frame(
+                                width:
+                                    truncScale < 1.15 ?
+                                        5 * designUnit :
+                                        (
+                                            truncScale < 3.0 ?
+                                            designUnit * 2 :       designUnit
+                                        ),
+                                    height:
+                                        axisHeight(
+                                            fromFrameHeight: geometry.size.height
+                                        )
+                                        - maxUnitHeight(fromHeight: geometry.size.height),
+                                    alignment: .top
+                                )
+                        }
+                    }
+                    .offset(
+                        x: maxBoundaryOffset,
+                        y: active ?
+                        // TODO: Má tato konstanta opodstatnění?
+                        2.5 :
+                        .zero
+                    )
+                
+                    VStack {
+                        Rectangle()
+                            .frame(
+                                width: 1,
+                                height: maxUnitHeight(fromHeight: geometry.size.height)
+                            )
+                            .foregroundColor(.white)
+                        
+                        if active {
+                            valueLabel?(minValue)
+                            .frame(
+                                width:
+                                    truncScale < 1.15 ?
+                                        5 * designUnit :
+                                        (
+                                            truncScale < 3.0 ?
+                                            designUnit * 2 :       designUnit
+                                        ),
+                                    height:
+                                        axisHeight(
+                                            fromFrameHeight: geometry.size.height
+                                        )
+                                        - maxUnitHeight(fromHeight: geometry.size.height),
+                                    alignment: .top
+                                )
+                        }
+                    }
+                    .offset(
+                        x: minBoundaryOffset,
+                        y: active ?
+                        // TODO: Má tato konstanta opodstatnění?
+                        2.5 :
+                                .zero
+                    )
+                }
+                .frame(
+                    width: geometry.size.width,
+                    height: axisHeight(fromFrameHeight: geometry.size.height),
+                    alignment: active ?
+                        .top :
+                        .center
+                )
             }
+            .clipShape(Rectangle())
         }
     }
     
+    // TODO: Ošetřit dělení nulou
+    private var maxBoundaryOffset: CGFloat {
+        toDesignBase(value: (maxValue - value) / unit * designUnit)
+    }
+    
+    private var minBoundaryOffset: CGFloat {
+        toDesignBase(value: (minValue - value) / unit * designUnit)
+    }
+    
     // TODO: Musí se tenhle kód v každém -AxisView opakovat?
+    private func toDesignBase(value: CGFloat) -> CGFloat {
+        value * (maxDesignValue - minDesignValue) / (maxValue - minValue)
+    }
+    
+    private func toRealBase(value: CGFloat) -> CGFloat {
+        value * (maxValue - minValue) / (maxDesignValue - minDesignValue)
+    }
+    
+    private var relativeUnit: CGFloat {
+        toRealBase(value: unit)
+    }
+    
+    private var relativeValue: CGFloat {
+        toRealBase(value: value)
+    }
+    
+    var defaultStep: CGFloat {
+        return toDesignBase(value: (unitSize / 5))
+    }
+    
+    // Reálná hodnota zobrazené jednotky
+    public var unit: CGFloat {
+        Double(defaultStep) / scaleBase
+    }
+    
+    // Grafická vzdálenost jedné jednotky
+    public var designUnit: CGFloat {
+        CGFloat(defaultStep) * truncScale
+    }
+    
     public func unitOffset(forIndex index: Int) -> CGFloat {
         let offset = (
             (CGFloat(index) * designUnit)
@@ -149,7 +273,7 @@ struct PreciseAxis2DView<ValueLabel:View>: View, Animatable {
     // Index jednotky s ohledem na zvolenou hodnotu
     public func relativeIndex(forIndex index: Int, withWidth width: CGFloat) -> Int {
         
-        let indexOffset = index - Int(value / unit)
+        let indexOffset = index - Int(value / relativeUnit)
         
         // Zaokrouhlení k nejbližšímu nižšímu násobku celkového počtu jednotek
         let roundedOffset = Int(floor(
@@ -161,7 +285,7 @@ struct PreciseAxis2DView<ValueLabel:View>: View, Animatable {
     }
     
     public var offset: CGFloat {
-        (value / unit) * designUnit
+        toDesignBase(value: ((value / unit) * designUnit))
     }
     
     private func maximumUnitOffset(fromWidth width: CGFloat) -> CGFloat {
@@ -185,12 +309,12 @@ struct PreciseAxis2DView<ValueLabel:View>: View, Animatable {
     }
     
     private func maxUnitHeight(fromHeight height: CGFloat) -> CGFloat {
-        return axisHeight(fromFrameHeight: height) / 2
+        active ? axisHeight(fromFrameHeight: height) * 0.4 : axisHeight(fromFrameHeight: height) * 0.8
     }
     
     public func isUnitVisible(ofIndex index: Int, withWidth width: CGFloat) -> Bool {
-        if (unitValue(forIndex: index, withWidth: width) > maxValue ||
-            unitValue(forIndex: index, withWidth: width) < minValue) &&
+        if (unitValue(forIndex: index, withWidth: width) >= maxValue ||
+            unitValue(forIndex: index, withWidth: width) <= minValue) &&
             !isInfinite {
             return false
         }
@@ -201,7 +325,7 @@ struct PreciseAxis2DView<ValueLabel:View>: View, Animatable {
     
     public func unitValue(forIndex index: Int, withWidth width: CGFloat) -> Double {
         return (
-            (unit * Double(relativeIndex(forIndex: index, withWidth: width) - middleIndex(fromWidth: width)))
+            (relativeUnit * Double(relativeIndex(forIndex: index, withWidth: width) - middleIndex(fromWidth: width)))
         )
     }
     
@@ -224,17 +348,14 @@ struct PreciseAxis2DView<ValueLabel:View>: View, Animatable {
     }
     
     func unitHeight(forIndex index: Int, withFrameSize frame: CGSize) -> CGFloat {
-        let height = axisHeight(fromFrameHeight: frame.height)
+        maxUnitHeight(fromHeight: frame.height)
         * unitHeightRatio(forIndex: relativeIndex(forIndex: index, withWidth: frame.width))
-            * 0.8
-        
-        return active ? height/2 : height
     }
 }
 
 struct PreciseAxis2DView_Previews: PreviewProvider {
     static var previews: some View {
-        PreciseAxis2DView(maxValue: 1000, minValue: -1000, value: 0.0, truncScale: 1.0, designUnit: 10.0, unit: 10.0, isInfinite: false, isActive: true, valueLabel: { value in
+        PreciseAxis2DView(maxValue: 1000, minValue: -1000, value: 900.0, truncScale: 1.0, isInfinite: false, isActive: true, minDesignValue: -350, maxDesignValue: 350, unitSize: 100, scaleBase: 1.0, valueLabel: { value in
                 Text("\(Int(value))")
                 .foregroundColor(.white)
                 .font(
