@@ -8,7 +8,6 @@
 import SwiftUI
 
 struct PreciseSlider2D<Content:View>: View {
-    @ObservedObject var viewModel: PreciseSlider2DViewModel
     @ObservedObject var axisX: PreciseAxis2DViewModel
     @ObservedObject var axisY: PreciseAxis2DViewModel
     
@@ -99,8 +98,8 @@ struct PreciseSlider2D<Content:View>: View {
                 
                 // Osa Y
                 ZStack {
-                    PreciseAxis2DView(maxValue: axisY.maxValue, minValue: axisY.minValue, value: axisY.value, truncScale: axisY.truncScale, isInfinite: axisY.isInfinite, isActive: axisY.active, minDesignValue: minYValue(fromFrameSize: geometry.size), maxDesignValue: maxYValue(fromFrameSize: geometry.size), unitSize: axisY.defaultStep, scaleBase: axisY.scaleBase, valueLabel: { value in
-                            Text("\(value)")
+                    PreciseAxis2DView(maxValue: axisY.maxValue, minValue: axisY.minValue, value: axisY.value, truncScale: axisY.truncScale, isInfinite: axisY.isInfinite, isActive: axisY.active, minDesignValue: minYValue(fromFrameSize: geometry.size), maxDesignValue: maxYValue(fromFrameSize: geometry.size), defaultStep: axisY.unitSize, scaleBase: axisY.scaleBase, valueLabel: { value in
+                            Text("\(Int(value))")
                                 .rotationEffect(.degrees(-90))
                                 .foregroundColor(.white)
                                 .font(
@@ -139,8 +138,8 @@ struct PreciseSlider2D<Content:View>: View {
                 
                 // Osa X
                 ZStack {
-                    PreciseAxis2DView(maxValue: axisX.maxValue, minValue: axisX.minValue, value: axisX.value, truncScale: axisX.truncScale, isInfinite: axisX.isInfinite, isActive: axisX.active, minDesignValue: minXValue(fromFrameSize: geometry.size), maxDesignValue: maxXValue(fromFrameSize: geometry.size), unitSize: axisX.defaultStep, scaleBase: axisX.scaleBase, valueLabel: { value in
-                            Text("\(value)")
+                    PreciseAxis2DView(maxValue: axisX.maxValue, minValue: axisX.minValue, value: axisX.value, truncScale: axisX.truncScale, isInfinite: axisX.isInfinite, isActive: axisX.active, minDesignValue: minXValue(fromFrameSize: geometry.size), maxDesignValue: maxXValue(fromFrameSize: geometry.size), defaultStep: axisX.unitSize, scaleBase: axisX.scaleBase, valueLabel: { value in
+                            Text("\(Int(value))")
                                 .rotationEffect(.degrees(180))
                                 .foregroundColor(.white)
                                 .font(
@@ -278,7 +277,6 @@ struct PreciseSlider2D<Content:View>: View {
 struct PreciseSlider2D_Previews: PreviewProvider {
     static var previews: some View {
         PreciseSlider2D(
-            viewModel: PreciseSlider2DViewModel(),
             axisX: PreciseAxis2DViewModel(),
             axisY: PreciseAxis2DViewModel(),
             content: { scale in

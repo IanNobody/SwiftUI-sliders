@@ -25,7 +25,11 @@ class PreciseSliderViewModel: ObservableObject {
     public var isInfinite: Bool = false
     
     // Výchozí vzdálenost mezi jednotkami
-    public let defaultStep: CGFloat = 20.0
+    public let unitSize: CGFloat = 20.0
+    
+    public var defaultStep: CGFloat {
+        unitSize / 5
+    }
     
     public var truncScale: Double {
         scale / scaleBase
@@ -34,17 +38,6 @@ class PreciseSliderViewModel: ObservableObject {
     public var scaleBase: Double {
         let exponent = floor(log(scale) / log(5))
         return pow(5, exponent)
-    }
-    
-    // TODO: Po přesunutí do View smazat
-    // Reálná hodnota zobrazené jednotky
-    public var unit: CGFloat {
-        Double(defaultStep) / scaleBase
-    }
-    
-    // Grafická vzdálenost jedné jednotky
-    public var designUnit: CGFloat {
-        CGFloat(defaultStep) * truncScale
     }
     
     //

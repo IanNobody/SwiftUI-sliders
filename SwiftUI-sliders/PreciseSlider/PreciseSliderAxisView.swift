@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-struct PreciseSliderAxisView: View, Animatable {
+struct PreciseSliderAxisView<UnitLabel: View>: View, Animatable {
     let maxValue: CGFloat
     let minValue: CGFloat
     
@@ -21,9 +21,11 @@ struct PreciseSliderAxisView: View, Animatable {
     let maxDesignValue: CGFloat
     let minDesignValue: CGFloat
     let scaleBase: CGFloat
-    let unitSize: CGFloat
+    let defaultStep: CGFloat
     
-    init(maxValue: CGFloat, minValue: CGFloat, value: CGFloat, truncScale: CGFloat, isInfinite: Bool, maxDesignValue: CGFloat, minDesignValue: CGFloat, scaleBase: CGFloat, unitSize: CGFloat) {
+    @ViewBuilder let valueLabel: ((_ value: CGFloat) -> UnitLabel)?
+    
+    init(maxValue: CGFloat, minValue: CGFloat, value: CGFloat, truncScale: CGFloat, isInfinite: Bool, maxDesignValue: CGFloat, minDesignValue: CGFloat, scaleBase: CGFloat, defaultStep: CGFloat, valueLabel: ((_ value: CGFloat) -> UnitLabel)?) {
         self.maxValue = maxValue
         self.minValue = minValue
         self.animatableData = value
@@ -32,131 +34,109 @@ struct PreciseSliderAxisView: View, Animatable {
         self.maxDesignValue = maxDesignValue
         self.minDesignValue = minDesignValue
         self.scaleBase = scaleBase
-        self.unitSize = unitSize
+        self.defaultStep = defaultStep
+        self.valueLabel = valueLabel
     }
     
     // TODO: Vyřešit nekonečnost osy (aktuálně hrozí přetečení relativního indexu)
-    // TODO: Při špatně zvoleném kroku chybí poslední jednotka
     // TODO: Používat vlastní GeometryReader nebo si ho nechat předávat od parent View?
+    // TODO: Volitelné barvy
     var body: some View {
         GeometryReader { geometry in
             ZStack {
                 // Pozadí
                 Rectangle()
-                    // TODO: Volitelná barva pozadí
                     .foregroundColor(.black)
                 //
                 ForEach(0..<numberOfUnits(fromWidth: geometry.size.width), id: \.self) { index in
                     if isUnitVisible(ofIndex: index, withWidth: geometry.size.width)
                     {
-                        ZStack {
-                            // TODO: Vytáhnout jednotku do vlastního View
-                            Rectangle()
-                                .frame(width: 1, height: unitHeight(forIndex: index, withFrameSize: geometry.size), alignment: .leading)
-                                // TODO: Volitelná barva jednotek
-                                .foregroundColor(.white)
-                            //
-                            unitLabel(forIndex: index, withWidth: geometry.size.width)
-                                .background(.black)
-                                .font(.system(size:7, design: .rounded))
-                                .foregroundColor(.white)
-                                .frame(width:
-                                        truncScale < 1.15 ?
-                                       5 * designUnit :
-                                        (truncScale < 3.0 ? designUnit * 2 : designUnit),
-                                       height: 15)
-                        }.offset(x: normalizedOffset(fromOffset: unitOffset(forIndex: index), withWidth: geometry.size.width))
+                        PreciseSliderUnitView {
+                            if truncScale > 3.0 ||
+                                relativeIndex(forIndex: index, withWidth: geometry.size.width) % 5 == 0 {
+                                valueLabel?(unitValue(forIndex: index, withWidth: geometry.size.width))
+                            }
+                        }
+                        .frame(width: maxLabelWidth, height: unitHeight(forIndex: index, withFrameSize: geometry.size))
+                        .offset(
+                            x: unitOffset(forIndex: index, withWidth: geometry.size.width))
                     }
                 }
                 // Středový bod
                 Rectangle().frame(width: 1, height: geometry.size.height * 0.8).foregroundColor(.blue)
                 
-                ZStack {
-                    // TODO: Vytáhnout jednotku do vlastního View
-                    Rectangle()
-                        .frame(width: 1, height: maxUnitHeight(fromHeight: geometry.size.height))
-                        .foregroundColor(.white)
-                    //
-                    Text("\(maxValue)")
-                        .background(.black)
-                        .font(.system(size:7, design: .rounded))
-                        .foregroundColor(.white)
-                        .frame(width:
-                                truncScale < 1.15 ?
-                               5 * designUnit :
-                                (truncScale < 3.0 ? designUnit * 2 : designUnit),
-                               height: 15)
+                // TODO: Při špatně zvoleném kroku text poslední jednotky překrývá ty předchozí.
+                // Zobrazení jednotky minimální hodnoty
+                PreciseSliderUnitView {
+                    valueLabel?(minValue)
                 }
-                .offset(x: maxBoundaryOffset)
-                
-                ZStack {
-                    // TODO: Vytáhnout jednotku do vlastního View
-                    Rectangle()
-                        .frame(width: 1, height: maxUnitHeight(fromHeight: geometry.size.height))
-                        .foregroundColor(.white)
-                    //
-                    Text("\(minValue)")
-                        .background(.black)
-                        .font(.system(size:7, design: .rounded))
-                        .foregroundColor(.white)
-                        .frame(width:
-                                truncScale < 1.15 ?
-                               5 * designUnit :
-                                (truncScale < 3.0 ? designUnit * 2 : designUnit),
-                               height: 15)
-                }
+                .frame(
+                    width: maxLabelWidth,
+                    height: maxUnitHeight(fromHeight: geometry.size.height)
+                )
                 .offset(x: minBoundaryOffset)
+                
+                // Zobrazení jednotky maximální hodnoty
+                PreciseSliderUnitView {
+                    valueLabel?(maxValue)
+                }
+                .frame(
+                    width: maxLabelWidth,
+                    height: maxUnitHeight(fromHeight: geometry.size.height)
+                )
+                .offset(x: maxBoundaryOffset)
             }
         }
         .clipShape(Rectangle())
     }
     
+    private var maxLabelWidth: CGFloat {
+        truncScale < 1.15 ?
+            (4.8 * designUnit) :
+            (truncScale < 3.0 ?
+                (designUnit * 1.8) :
+                (designUnit * 0.8))
+    }
+    
+    private func maxLabelHeight(fromHeight height: CGFloat) -> CGFloat {
+        maxUnitHeight(fromHeight: height) / 3
+    }
+    
     private var maxBoundaryOffset: CGFloat {
-        toDesignBase(value: (maxValue - value) / unit * designUnit)
+        (maxValue - value) / unit * designUnit
     }
     
     private var minBoundaryOffset: CGFloat {
-        toDesignBase(value: (minValue - value) / unit * designUnit)
+        (minValue - value) / unit * designUnit
     }
     
-    // TODO: Refactor
     private func toDesignBase(value: CGFloat) -> CGFloat {
         value * (maxDesignValue - minDesignValue) / (maxValue - minValue)
     }
     
-    private func toRealBase(value: CGFloat) -> CGFloat {
-        value * (maxValue - minValue) / (maxDesignValue - minDesignValue)
-    }
-    
-    private var relativeUnit: CGFloat {
-        toRealBase(value: unit)
-    }
-    
-    private var relativeValue: CGFloat {
-        toRealBase(value: value)
-    }
-    
-    var defaultStep: CGFloat {
-        return toDesignBase(value: (unitSize / 5))
-    }
-    
-    // Reálná hodnota zobrazené jednotky
+    // Reálná hodnota jedné jednotky
     public var unit: CGFloat {
-        Double(defaultStep) / scaleBase
+        defaultStep / scaleBase
     }
     
-    // Grafická vzdálenost jedné jednotky
+    // Grafická hodnota jedné jednotky
     public var designUnit: CGFloat {
-        CGFloat(defaultStep) * truncScale
+        toDesignBase(value: defaultStep) * truncScale
     }
     
-    private func unitOffset(forIndex index: Int) -> CGFloat {
-        let offset = (
-            (CGFloat(index) * designUnit)
-            - offset
-        )
+    private func unitOffset(forIndex index: Int, withWidth width: CGFloat) -> CGFloat {
+        var offset = (CGFloat(index) * designUnit) - offset
+        let max = maxUnitOffset(fromWidth: width)
+        let scaleCorrection = designUnit * CGFloat(middleIndex(fromWidth: width))
         
-        return offset
+        if offset > max {
+            offset = offset.truncatingRemainder(dividingBy: max)
+        }
+        else if offset < 0 {
+            offset = max + offset.truncatingRemainder(dividingBy: max)
+        }
+        
+        return (offset - scaleCorrection)
     }
     
     private func numberOfUnits(fromWidth width: CGFloat) -> Int {
@@ -179,10 +159,9 @@ struct PreciseSliderAxisView: View, Animatable {
         return Int(numberOfUnits(fromWidth: width) / 2)
     }
     
-    // Index jednotky s ohledem na zvolenou hodnotu
+    // Unikátní index každé jednotky
     public func relativeIndex(forIndex index: Int, withWidth width: CGFloat) -> Int {
-        
-        let indexOffset = index - Int(value / relativeUnit)
+        let indexOffset = index - Int(value / unit) - 1
         
         // Zaokrouhlení k nejbližšímu nižšímu násobku celkového počtu jednotek
         let roundedOffset = Int(floor(
@@ -190,31 +169,16 @@ struct PreciseSliderAxisView: View, Animatable {
             / Float(numberOfUnits(fromWidth: width))
         )) * numberOfUnits(fromWidth: width)
 
-        return index - roundedOffset
+        return index - middleIndex(fromWidth: width) - roundedOffset
     }
     
+    // Posun osy dle vybrané hodnoty
     public var offset: CGFloat {
-        toDesignBase(value: ((value / unit) * designUnit))
+        (value / unit) * designUnit
     }
     
-    private func maximumUnitOffset(fromWidth width: CGFloat) -> CGFloat {
+    private func maxUnitOffset(fromWidth width: CGFloat) -> CGFloat {
         return CGFloat(numberOfUnits(fromWidth: width)) * designUnit
-    }
-    
-    private func normalizedOffset(fromOffset offset: CGFloat, withWidth width: CGFloat) -> CGFloat {
-        let max = maximumUnitOffset(fromWidth: width)
-        
-        let scaleCorrection = designUnit * CGFloat(middleIndex(fromWidth: width))
-        
-        if offset > max {
-            return (offset.truncatingRemainder(dividingBy: max) - scaleCorrection)
-        }
-        
-        if offset < 0 {
-            return max + (offset.truncatingRemainder(dividingBy: max) - scaleCorrection)
-        }
-        
-        return (offset - scaleCorrection)
     }
     
     public func unitHeightRatio(forIndex index: Int) -> CGFloat {
@@ -231,13 +195,7 @@ struct PreciseSliderAxisView: View, Animatable {
     }
     
     public func unitHeight(forIndex index: Int, withFrameSize frame: CGSize) -> CGFloat {
-        let value = unitValue(forIndex: index, withWidth: frame.width)
-        
-        if value == minValue || value == maxValue {
-            return maxUnitHeight(fromHeight: frame.height)
-        }
-        
-        return unitHeightRatio(forIndex: relativeIndex(forIndex: index, withWidth: frame.width)) * maxUnitHeight(fromHeight: frame.height)
+        unitHeightRatio(forIndex: relativeIndex(forIndex: index, withWidth: frame.width)) * maxUnitHeight(fromHeight: frame.height)
     }
     
     public func isUnitVisible(ofIndex index: Int, withWidth width: CGFloat) -> Bool {
@@ -251,30 +209,20 @@ struct PreciseSliderAxisView: View, Animatable {
         }
     }
     
-    // TODO: Custom label
-    private func unitLabel(forIndex index: Int, withWidth width: CGFloat) -> Text {
-        return defaultUnitLabel(forIndex: index, withWidth: width)
-    }
-    
     public func unitValue(forIndex index: Int, withWidth width: CGFloat) -> Double {
-        return (
-            (relativeUnit * Double(relativeIndex(forIndex: index, withWidth: width) - middleIndex(fromWidth: width)))
-        )
-    }
-    
-    private func defaultUnitLabel(forIndex index: Int, withWidth width: CGFloat) -> Text {
-        if truncScale > 3.0 ||
-            relativeIndex(forIndex: index, withWidth: width) % 5 == 0 {
-            return Text(String(unitValue(forIndex: index, withWidth: width)))
-        }
-        //
-        return Text("")
+            unit * Double(relativeIndex(forIndex: index, withWidth: width))
     }
 }
 
 struct PreciseSliderAxisView_Previews: PreviewProvider {
     static var previews: some View {
-        PreciseSliderAxisView(maxValue: 150.0, minValue: -150.0, value: 140, truncScale: 1.8, isInfinite: false, maxDesignValue: 350, minDesignValue: -350, scaleBase: 1.0, unitSize: 20)
-            .frame(width: 350, height: 50, alignment: .center)
+        PreciseSliderAxisView(maxValue: 200.0, minValue: -200.0, value: 0, truncScale: 1, isInfinite: false, maxDesignValue: 300, minDesignValue: -300, scaleBase: 1.0, defaultStep: 4, valueLabel: { value in
+                Text("\(value)")
+                    .background(.black)
+                    .font(.system(size:7, design: .rounded))
+                    .foregroundColor(.white)
+            }
+        )
+        .frame(width: 300, height: 50, alignment: .center)
     }
 }

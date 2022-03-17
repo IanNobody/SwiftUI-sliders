@@ -7,15 +7,16 @@
 
 import SwiftUI
 
-struct PreciseSliderView: View {
+struct PreciseSliderView<ValueLabel: View>: View {
     @ObservedObject var viewModel: PreciseSliderViewModel
+    @ViewBuilder var valueLabel: ((_ value: CGFloat) -> ValueLabel)
     
     // TODO: Rozdělit rozhraní pro UIKit a SwiftUI elegantnějším způsobem
     // TODO: Vyřešit chyby vzniklé nedokončenými gesty (nevyvolání události .onEnded)
     var body: some View {
         GeometryReader { geometry in
             ZStack {
-                PreciseSliderAxisView(maxValue: viewModel.maxValue, minValue: viewModel.minValue, value: viewModel.value, truncScale: viewModel.truncScale, isInfinite: viewModel.isInfinite, maxDesignValue: maxDesignValue(fromWidth: geometry.size.width), minDesignValue: minDesignValue(fromWidth: geometry.size.width), scaleBase: viewModel.scaleBase, unitSize: viewModel.defaultStep)
+                PreciseSliderAxisView(maxValue: viewModel.maxValue, minValue: viewModel.minValue, value: viewModel.value, truncScale: viewModel.truncScale, isInfinite: viewModel.isInfinite, maxDesignValue: maxDesignValue(fromWidth: geometry.size.width), minDesignValue: minDesignValue(fromWidth: geometry.size.width), scaleBase: viewModel.scaleBase, defaultStep: viewModel.defaultStep, valueLabel: valueLabel)
             }
             // Výběr hodnoty
             .gesture(
@@ -58,7 +59,12 @@ struct PreciseSliderView: View {
 
 struct PreciseSliderView_Previews: PreviewProvider {
     static var previews: some View {
-        PreciseSliderView(viewModel: PreciseSliderViewModel())
-            .frame(width: 300, height: 50, alignment: .center)
+        PreciseSliderView(viewModel: PreciseSliderViewModel(), valueLabel: { value in
+            Text("\(value)")
+                .background(.black)
+                .font(.system(size: 7, design: .rounded))
+                .foregroundColor(.white)
+        })
+        .frame(width: 350, height: 50, alignment: .center)
     }
 }

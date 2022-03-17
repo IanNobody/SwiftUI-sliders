@@ -9,23 +9,24 @@
 /* Begin PBXBuildFile section */
 		D113EB2227D66A9900F3237F /* PreciseSliderAxisView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D113EB2127D66A9900F3237F /* PreciseSliderAxisView.swift */; };
 		D13FB91A27BC278D007F281E /* PreciseSlider2DView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D13FB91927BC278D007F281E /* PreciseSlider2DView.swift */; };
-		D13FB91C27BC2838007F281E /* PreciseSlider2DViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = D13FB91B27BC2838007F281E /* PreciseSlider2DViewModel.swift */; };
 		D13FB91E27BCFD2C007F281E /* PreciseAxis2DView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D13FB91D27BCFD2C007F281E /* PreciseAxis2DView.swift */; };
 		D13FB92027BCFDC6007F281E /* PreciseAxis2DViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = D13FB91F27BCFDC6007F281E /* PreciseAxis2DViewModel.swift */; };
+		D17DB0D127E2860A0063A560 /* PreciseUnit2DView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D17DB0D027E2860A0063A560 /* PreciseUnit2DView.swift */; };
 		D19D33D627A9B9DD00E647E8 /* PreciseSliderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D19D33D527A9B9DD00E647E8 /* PreciseSliderView.swift */; };
 		D1B8821927B69CCE003351A0 /* PreciseSliderDataSource.swift in Sources */ = {isa = PBXBuildFile; fileRef = D1B8821827B69CCE003351A0 /* PreciseSliderDataSource.swift */; };
 		D1B8821B27B6A7B6003351A0 /* PreciseSliderViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = D1B8821A27B6A7B6003351A0 /* PreciseSliderViewModel.swift */; };
 		D1B8822127B7F60C003351A0 /* PreciseSliderDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = D1B8822027B7F60C003351A0 /* PreciseSliderDelegate.swift */; };
 		D1C33C4F27A7DC5F00A73AEB /* SwiftUI_sliders.docc in Sources */ = {isa = PBXBuildFile; fileRef = D1C33C4E27A7DC5F00A73AEB /* SwiftUI_sliders.docc */; };
 		D1C33C5027A7DC5F00A73AEB /* SwiftUI_sliders.h in Headers */ = {isa = PBXBuildFile; fileRef = D1C33C4D27A7DC5F00A73AEB /* SwiftUI_sliders.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		D1CE9B9A27E13F30004210EA /* PreciseSliderUnitView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D1CE9B9927E13F30004210EA /* PreciseSliderUnitView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
 		D113EB2127D66A9900F3237F /* PreciseSliderAxisView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PreciseSliderAxisView.swift; sourceTree = "<group>"; };
 		D13FB91927BC278D007F281E /* PreciseSlider2DView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PreciseSlider2DView.swift; sourceTree = "<group>"; };
-		D13FB91B27BC2838007F281E /* PreciseSlider2DViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PreciseSlider2DViewModel.swift; sourceTree = "<group>"; };
 		D13FB91D27BCFD2C007F281E /* PreciseAxis2DView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PreciseAxis2DView.swift; sourceTree = "<group>"; };
 		D13FB91F27BCFDC6007F281E /* PreciseAxis2DViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PreciseAxis2DViewModel.swift; sourceTree = "<group>"; };
+		D17DB0D027E2860A0063A560 /* PreciseUnit2DView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PreciseUnit2DView.swift; sourceTree = "<group>"; };
 		D19D33D527A9B9DD00E647E8 /* PreciseSliderView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PreciseSliderView.swift; sourceTree = "<group>"; };
 		D1B8821827B69CCE003351A0 /* PreciseSliderDataSource.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PreciseSliderDataSource.swift; sourceTree = "<group>"; };
 		D1B8821A27B6A7B6003351A0 /* PreciseSliderViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PreciseSliderViewModel.swift; sourceTree = "<group>"; };
@@ -33,6 +34,7 @@
 		D1C33C4A27A7DC5F00A73AEB /* SwiftUI_sliders.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = SwiftUI_sliders.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		D1C33C4D27A7DC5F00A73AEB /* SwiftUI_sliders.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = SwiftUI_sliders.h; sourceTree = "<group>"; };
 		D1C33C4E27A7DC5F00A73AEB /* SwiftUI_sliders.docc */ = {isa = PBXFileReference; lastKnownFileType = folder.documentationcatalog; path = SwiftUI_sliders.docc; sourceTree = "<group>"; };
+		D1CE9B9927E13F30004210EA /* PreciseSliderUnitView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PreciseSliderUnitView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -54,6 +56,7 @@
 				D1B8821A27B6A7B6003351A0 /* PreciseSliderViewModel.swift */,
 				D1B8822027B7F60C003351A0 /* PreciseSliderDelegate.swift */,
 				D113EB2127D66A9900F3237F /* PreciseSliderAxisView.swift */,
+				D1CE9B9927E13F30004210EA /* PreciseSliderUnitView.swift */,
 			);
 			path = PreciseSlider;
 			sourceTree = "<group>";
@@ -62,9 +65,9 @@
 			isa = PBXGroup;
 			children = (
 				D13FB91927BC278D007F281E /* PreciseSlider2DView.swift */,
-				D13FB91B27BC2838007F281E /* PreciseSlider2DViewModel.swift */,
 				D13FB91D27BCFD2C007F281E /* PreciseAxis2DView.swift */,
 				D13FB91F27BCFDC6007F281E /* PreciseAxis2DViewModel.swift */,
+				D17DB0D027E2860A0063A560 /* PreciseUnit2DView.swift */,
 			);
 			path = PreciseSlider2D;
 			sourceTree = "<group>";
@@ -175,15 +178,16 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				D1CE9B9A27E13F30004210EA /* PreciseSliderUnitView.swift in Sources */,
 				D19D33D627A9B9DD00E647E8 /* PreciseSliderView.swift in Sources */,
 				D13FB92027BCFDC6007F281E /* PreciseAxis2DViewModel.swift in Sources */,
-				D13FB91C27BC2838007F281E /* PreciseSlider2DViewModel.swift in Sources */,
 				D1B8822127B7F60C003351A0 /* PreciseSliderDelegate.swift in Sources */,
 				D13FB91E27BCFD2C007F281E /* PreciseAxis2DView.swift in Sources */,
 				D1B8821B27B6A7B6003351A0 /* PreciseSliderViewModel.swift in Sources */,
 				D113EB2227D66A9900F3237F /* PreciseSliderAxisView.swift in Sources */,
 				D1B8821927B69CCE003351A0 /* PreciseSliderDataSource.swift in Sources */,
 				D13FB91A27BC278D007F281E /* PreciseSlider2DView.swift in Sources */,
+				D17DB0D127E2860A0063A560 /* PreciseUnit2DView.swift in Sources */,
 				D1C33C4F27A7DC5F00A73AEB /* SwiftUI_sliders.docc in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
