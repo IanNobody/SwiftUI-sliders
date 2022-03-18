@@ -8,9 +8,12 @@
 import Foundation
 import SwiftUI
 
-class PreciseSliderViewModel: ObservableObject {
-    @Published var value: Double = Double.zero
-    @Published var scale: Double = 1.0
+open class PreciseSliderViewModel: ObservableObject {
+    @Published public var value: Double = Double.zero
+    @Published public var scale: Double = 1.0
+
+    // TODO: Musí tady být explicitní public init?
+    public init() { }
     
     public var prevValue: Double = Double.zero
     public var prevScale: Double = 1.0
@@ -84,7 +87,7 @@ class PreciseSliderViewModel: ObservableObject {
         scale = newScale
     }
     
-    public func animateMomentum(byValue difference: CGFloat, duration: CGFloat) {
+    open func animateMomentum(byValue difference: CGFloat, duration: CGFloat) {
         let newValue = value - (difference / scale)
         
         if value > minValue && value < maxValue &&

@@ -16,7 +16,7 @@ struct PreciseSliderView<ValueLabel: View>: View {
     var body: some View {
         GeometryReader { geometry in
             ZStack {
-                PreciseSliderAxisView(maxValue: viewModel.maxValue, minValue: viewModel.minValue, value: viewModel.value, truncScale: viewModel.truncScale, isInfinite: viewModel.isInfinite, maxDesignValue: maxDesignValue(fromWidth: geometry.size.width), minDesignValue: minDesignValue(fromWidth: geometry.size.width), scaleBase: viewModel.scaleBase, defaultStep: viewModel.defaultStep, valueLabel: valueLabel)
+                PreciseAxisView(maxValue: viewModel.maxValue, minValue: viewModel.minValue, value: viewModel.value, truncScale: viewModel.truncScale, isInfinite: viewModel.isInfinite, maxDesignValue: maxDesignValue(fromWidth: geometry.size.width), minDesignValue: minDesignValue(fromWidth: geometry.size.width), scaleBase: viewModel.scaleBase, defaultStep: viewModel.defaultStep, valueLabel: valueLabel)
             }
             // Výběr hodnoty
             .gesture(

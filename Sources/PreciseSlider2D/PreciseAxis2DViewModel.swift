@@ -7,8 +7,9 @@
 
 import Foundation
 import SwiftUI
+import PreciseSlider
 
-class PreciseAxis2DViewModel: PreciseSliderViewModel {
+public class PreciseAxis2DViewModel: PreciseSliderViewModel {
     @Published var active: Bool = false
     
     func activeMove(byValue difference: CGFloat) {
@@ -19,7 +20,7 @@ class PreciseAxis2DViewModel: PreciseSliderViewModel {
         super.move(byValue: difference)
     }
     
-    override func animateMomentum(byValue difference: CGFloat, duration: CGFloat) {
+    override public func animateMomentum(byValue difference: CGFloat, duration: CGFloat) {
         if active {
             withAnimation(.easeInOut.delay(2)) {
                 active = false

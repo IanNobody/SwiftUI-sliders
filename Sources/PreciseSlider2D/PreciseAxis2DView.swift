@@ -255,7 +255,7 @@ struct PreciseAxis2DView<ValueLabel:View>: View, Animatable {
 
 struct PreciseAxis2DView_Previews: PreviewProvider {
     static var previews: some View {
-        PreciseAxis2DView(maxValue: 1000, minValue: -1000, value: 900.0, truncScale: 1.0, isInfinite: false, isActive: true, minDesignValue: -350, maxDesignValue: 350, defaultStep: 20, scaleBase: 1.0, valueLabel: { value in
+        PreciseAxis2DView(maxValue: 1000, minValue: -1000, value: 900.0, truncScale: 1.2, isInfinite: false, isActive: false, minDesignValue: -350, maxDesignValue: 350, defaultStep: 20, scaleBase: 1.0, valueLabel: { value in
                 Text("\(Int(value))")
                 .foregroundColor(.white)
                 .font(

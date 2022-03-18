@@ -5,7 +5,6 @@
 //  Created by Šimon Strýček on 11.02.2022.
 //
 
-import Foundation
 import UIKit
 import SwiftUI
 

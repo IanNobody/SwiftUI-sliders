@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-struct PreciseSliderUnitView<UnitLabel: View>: View {
+struct PreciseUnitView<UnitLabel: View>: View {
     @ViewBuilder let unitLabel: () -> UnitLabel
     
     var body: some View {
@@ -29,9 +29,9 @@ struct PreciseSliderUnitView<UnitLabel: View>: View {
     }
 }
 
-struct PreciseSliderUnitView_Previews: PreviewProvider {
+struct PreciseUnitView_Previews: PreviewProvider {
     static var previews: some View {
-        PreciseSliderUnitView(unitLabel: {
+        PreciseUnitView(unitLabel: {
             Text("0")
                 .foregroundColor(.white)
         })

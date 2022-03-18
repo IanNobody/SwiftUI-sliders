@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-struct PreciseSliderAxisView<UnitLabel: View>: View, Animatable {
+struct PreciseAxisView<UnitLabel: View>: View, Animatable {
     let maxValue: CGFloat
     let minValue: CGFloat
     
@@ -51,7 +51,7 @@ struct PreciseSliderAxisView<UnitLabel: View>: View, Animatable {
                 ForEach(0..<numberOfUnits(fromWidth: geometry.size.width), id: \.self) { index in
                     if isUnitVisible(ofIndex: index, withWidth: geometry.size.width)
                     {
-                        PreciseSliderUnitView {
+                        PreciseUnitView {
                             if truncScale > 3.0 ||
                                 relativeIndex(forIndex: index, withWidth: geometry.size.width) % 5 == 0 {
                                 valueLabel?(unitValue(forIndex: index, withWidth: geometry.size.width))
@@ -67,7 +67,7 @@ struct PreciseSliderAxisView<UnitLabel: View>: View, Animatable {
                 
                 // TODO: Při špatně zvoleném kroku text poslední jednotky překrývá ty předchozí.
                 // Zobrazení jednotky minimální hodnoty
-                PreciseSliderUnitView {
+                PreciseUnitView {
                     valueLabel?(minValue)
                 }
                 .frame(
@@ -77,7 +77,7 @@ struct PreciseSliderAxisView<UnitLabel: View>: View, Animatable {
                 .offset(x: minBoundaryOffset)
                 
                 // Zobrazení jednotky maximální hodnoty
-                PreciseSliderUnitView {
+                PreciseUnitView {
                     valueLabel?(maxValue)
                 }
                 .frame(
@@ -214,9 +214,9 @@ struct PreciseSliderAxisView<UnitLabel: View>: View, Animatable {
     }
 }
 
-struct PreciseSliderAxisView_Previews: PreviewProvider {
+struct PreciseAxisView_Previews: PreviewProvider {
     static var previews: some View {
-        PreciseSliderAxisView(maxValue: 200.0, minValue: -200.0, value: 0, truncScale: 1, isInfinite: false, maxDesignValue: 300, minDesignValue: -300, scaleBase: 1.0, defaultStep: 4, valueLabel: { value in
+        PreciseAxisView(maxValue: 200.0, minValue: -200.0, value: 0, truncScale: 1, isInfinite: false, maxDesignValue: 300, minDesignValue: -300, scaleBase: 1.0, defaultStep: 4, valueLabel: { value in
                 Text("\(value)")
                     .background(.black)
                     .font(.system(size:7, design: .rounded))
