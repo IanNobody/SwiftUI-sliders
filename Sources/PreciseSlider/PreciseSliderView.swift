@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-struct PreciseSliderView<ValueLabel: View>: View {
+public struct PreciseSliderView<ValueLabel: View>: View {
     @ObservedObject public var viewModel: PreciseSliderViewModel
     @ViewBuilder public var valueLabel: (_ value: CGFloat) -> ValueLabel?
     
@@ -18,7 +18,7 @@ struct PreciseSliderView<ValueLabel: View>: View {
     
     // TODO: Rozdělit rozhraní pro UIKit a SwiftUI elegantnějším způsobem
     // TODO: Vyřešit chyby vzniklé nedokončenými gesty (nevyvolání události .onEnded)
-    var body: some View {
+    public var body: some View {
         GeometryReader { geometry in
             ZStack {
                 PreciseAxisView(maxValue: viewModel.maxValue, minValue: viewModel.minValue, value: viewModel.value, truncScale: viewModel.truncScale, isInfinite: viewModel.isInfinite, maxDesignValue: maxDesignValue(fromWidth: geometry.size.width), minDesignValue: minDesignValue(fromWidth: geometry.size.width), scaleBase: viewModel.scaleBase, defaultStep: viewModel.defaultStep, valueLabel: valueLabel)
