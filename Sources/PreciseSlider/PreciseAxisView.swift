@@ -21,7 +21,7 @@ struct PreciseAxisView<UnitLabel: View>: View, Animatable {
     let maxDesignValue: CGFloat
     let minDesignValue: CGFloat
     let scaleBase: CGFloat
-    let defaultStep: CGFloat
+    let stepSize: CGFloat
     
     @ViewBuilder let valueLabel: ((_ value: CGFloat) -> UnitLabel)?
     
@@ -34,7 +34,7 @@ struct PreciseAxisView<UnitLabel: View>: View, Animatable {
         self.maxDesignValue = maxDesignValue
         self.minDesignValue = minDesignValue
         self.scaleBase = scaleBase
-        self.defaultStep = defaultStep
+        self.stepSize = defaultStep
         self.valueLabel = valueLabel
     }
     
@@ -112,6 +112,15 @@ struct PreciseAxisView<UnitLabel: View>: View, Animatable {
     
     private func toDesignBase(value: CGFloat) -> CGFloat {
         value * (maxDesignValue - minDesignValue) / (maxValue - minValue)
+    }
+    
+    public var defaultStep: CGFloat {
+        if stepSize <= 0 {
+            return 10 / (maxDesignValue - minDesignValue) * (maxValue - minValue)
+        }
+        else {
+            return stepSize
+        }
     }
     
     // Reálná hodnota jedné jednotky

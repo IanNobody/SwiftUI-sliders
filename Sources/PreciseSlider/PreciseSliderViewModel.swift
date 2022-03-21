@@ -9,26 +9,69 @@ import Foundation
 import SwiftUI
 
 open class PreciseSliderViewModel: ObservableObject {
-    @Published public var value: Double = Double.zero
-    @Published public var scale: Double = 1.0
-
-    // TODO: Musí tady být explicitní public init?
-    public init() { }
+    @Published public private(set) var value: Double
+    @Published public private(set) var scale: Double
+    @Published public private(set) var isEditing: Bool = false
     
-    public var prevValue: Double = Double.zero
-    public var prevScale: Double = 1.0
+    public init(defaultValue: Double = Double.zero, defaultScale: Double = 1.0, minValue: Double = 0, maxValue: Double = 100, minScale: Double = 1.0, maxScale: Double = .infinity, unitSize: Double = 0, isInfinite: Bool = false) {
+        self.value = defaultValue
+        self.prevValue = defaultValue
+        self.scale = defaultScale
+        self.prevScale = defaultScale
+        self.minValue = minValue
+        self.maxValue = maxValue
+        self.minScale = minScale
+        self.maxScale = maxScale
+        self.unitSize = unitSize
+        self.isInfinite = isInfinite
+    }
+    
+    public var defaultValue: Double {
+        get {
+            value
+        }
+        set {
+            value = newValue
+            prevValue = newValue
+        }
+    }
+    
+    public var defaultScale: Double {
+        get {
+            scale
+        }
+        set {
+            scale = newValue
+            prevScale = newValue
+        }
+    }
+
+    public var safeValue: Double {
+        if value > maxValue {
+            return maxValue
+        }
+        
+        if value < minValue {
+            return minValue
+        }
+        
+        return value
+    }
+    
+    public var prevValue: Double
+    public var prevScale: Double
     
     // Meze posuvníku
-    public var maxValue: Double = 200 // Výchozí meze
-    public var minValue: Double = -200
+    public var maxValue: Double
+    public var minValue: Double
     
-    public var maxScale: Double = .infinity
-    public var minScale: Double = 1.0
+    public var maxScale: Double
+    public var minScale: Double
     
-    public var isInfinite: Bool = false
+    public var isInfinite: Bool
     
     // Výchozí vzdálenost mezi jednotkami
-    public let unitSize: CGFloat = 20.0
+    public var unitSize: CGFloat
     
     public var defaultStep: CGFloat {
         unitSize / 5
@@ -57,6 +100,7 @@ open class PreciseSliderViewModel: ObservableObject {
         }
         
         value = newValue
+        isEditing = true
     }
     
     public func move(toValue newValue: CGFloat) {
@@ -85,6 +129,7 @@ open class PreciseSliderViewModel: ObservableObject {
         }
         
         scale = newScale
+        isEditing = true
     }
     
     open func animateMomentum(byValue difference: CGFloat, duration: CGFloat) {
@@ -121,9 +166,11 @@ open class PreciseSliderViewModel: ObservableObject {
     
     public func editingValueEnded() {
         prevValue = value
+        isEditing = false
     }
     
     public func editingScaleEnded() {
         prevScale = scale
+        isEditing = false
     }
 }

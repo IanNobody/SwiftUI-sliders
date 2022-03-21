@@ -18,7 +18,7 @@ struct PreciseAxis2DView<ValueLabel:View>: View, Animatable {
     
     let minDesignValue: CGFloat
     let maxDesignValue: CGFloat
-    let defaultStep: CGFloat
+    let stepSize: CGFloat
     let scaleBase: CGFloat
     let truncScale: CGFloat
     let isInfinite: Bool
@@ -36,7 +36,7 @@ struct PreciseAxis2DView<ValueLabel:View>: View, Animatable {
         self.minDesignValue = minDesignValue
         self.maxDesignValue = maxDesignValue
         self.scaleBase = scaleBase
-        self.defaultStep = defaultStep
+        self.stepSize = defaultStep
         self.valueLabel = valueLabel
     }
     
@@ -139,6 +139,15 @@ struct PreciseAxis2DView<ValueLabel:View>: View, Animatable {
     // TODO: Musí se tenhle kód v každém -AxisView opakovat?
     private func toDesignBase(value: CGFloat) -> CGFloat {
         value * (maxDesignValue - minDesignValue) / (maxValue - minValue)
+    }
+    
+    public var defaultStep: CGFloat {
+        if stepSize <= 0 {
+            return 10 / (maxDesignValue - minDesignValue) * (maxValue - minValue)
+        }
+        else {
+            return stepSize
+        }
     }
     
     private var unit: CGFloat {

@@ -8,8 +8,13 @@
 import SwiftUI
 
 struct PreciseSliderView<ValueLabel: View>: View {
-    @ObservedObject var viewModel: PreciseSliderViewModel
-    @ViewBuilder var valueLabel: ((_ value: CGFloat) -> ValueLabel)
+    @ObservedObject public var viewModel: PreciseSliderViewModel
+    @ViewBuilder public var valueLabel: (_ value: CGFloat) -> ValueLabel?
+    
+    public init(viewModel: PreciseSliderViewModel, valueLabel: @escaping (_ value: CGFloat) -> ValueLabel?) {
+        self.viewModel = viewModel
+        self.valueLabel = valueLabel
+    }
     
     // TODO: Rozdělit rozhraní pro UIKit a SwiftUI elegantnějším způsobem
     // TODO: Vyřešit chyby vzniklé nedokončenými gesty (nevyvolání události .onEnded)
