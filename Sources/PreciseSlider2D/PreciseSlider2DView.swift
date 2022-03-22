@@ -202,11 +202,11 @@ struct PreciseSlider2D<Content:View>: View {
     
     // TODO: Ošetřit dělení nulou
     private func xOffsetTranslation(fromFrameSize frame: CGSize) -> CGFloat {
-        axisX.value * (maxXValue(fromFrameSize: frame) - minXValue(fromFrameSize: frame)) / (axisX.maxValue - axisX.minValue)
+        (axisX.value - axisX.minValue) * (maxXValue(fromFrameSize: frame) - minXValue(fromFrameSize: frame)) / (axisX.maxValue - axisX.minValue) + minXValue(fromFrameSize: frame)
     }
     
     private func yOffsetTranslation(fromFrameSize frame: CGSize) -> CGFloat {
-        axisY.value * (maxYValue(fromFrameSize: frame) - minYValue(fromFrameSize: frame)) / (axisY.maxValue - axisY.minValue)
+        (axisY.value - axisY.minValue) * (maxYValue(fromFrameSize: frame) - minYValue(fromFrameSize: frame)) / (axisY.maxValue - axisY.minValue) + minYValue(fromFrameSize: frame)
     }
     
     private func axisOffset(fromWidth width: CGFloat, isActive active: Bool) -> CGFloat {
