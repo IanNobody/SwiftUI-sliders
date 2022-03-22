@@ -170,15 +170,15 @@ struct PreciseAxisView<UnitLabel: View>: View, Animatable {
     
     // Unikátní index každé jednotky
     public func relativeIndex(forIndex index: Int, withWidth width: CGFloat) -> Int {
-        let indexOffset = index - Int(value / unit) - 1
+        let indexOffset = index - Int(ceil(value / unit))
+        let offsetRate = Int(floor(Float(abs(indexOffset)) / Float(numberOfUnits(fromWidth: width))))
         
-        // Zaokrouhlení k nejbližšímu nižšímu násobku celkového počtu jednotek
-        let roundedOffset = Int(floor(
-            Float(indexOffset)
-            / Float(numberOfUnits(fromWidth: width))
-        )) * numberOfUnits(fromWidth: width)
+        // Korekce zaokrouhlení pro záporná čísla
+        if indexOffset < 0 {
+            return index + (offsetRate + 1) * (numberOfUnits(fromWidth: width)) - middleIndex(fromWidth: width)
+        }
 
-        return index - middleIndex(fromWidth: width) - roundedOffset
+        return index - (offsetRate * (numberOfUnits(fromWidth: width))) - middleIndex(fromWidth: width)
     }
     
     // Posun osy dle vybrané hodnoty
