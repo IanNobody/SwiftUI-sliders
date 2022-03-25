@@ -52,26 +52,25 @@ struct PreciseAxisView<UnitLabel: View>: View, Animatable {
                     if isUnitVisible(ofIndex: index, withWidth: geometry.size.width)
                     {
                         PreciseUnitView {
-                            if truncScale > 3.0 ||
-                                relativeIndex(forIndex: index, withWidth: geometry.size.width) % 5 == 0 {
+                            if (truncScale > 3.0 ||
+                                relativeIndex(forIndex: index, withWidth: geometry.size.width) % 5 == 0) && !isUnitOverlapped(ofIndex: index, withFrameSize: geometry.size) {
                                 valueLabel?(unitValue(forIndex: index, withWidth: geometry.size.width))
+                                .zIndex(1)
                             }
                         }
-                        .frame(width: maxLabelWidth, height: unitHeight(forIndex: index, withFrameSize: geometry.size))
+                        .frame(width: maxLabelWidth(fromHeight: geometry.size.height), height: unitHeight(forIndex: index, withFrameSize: geometry.size))
                         .offset(
-                            x: unitOffset(forIndex: index, withWidth: geometry.size.width))
+                            x: unitOffset(forIndex: index, withWidth: geometry.size.width)
+                        )
                     }
                 }
-                // Středový bod
-                Rectangle().frame(width: 1, height: geometry.size.height * 0.8).foregroundColor(.blue)
                 
-                // TODO: Při špatně zvoleném kroku text poslední jednotky překrývá ty předchozí.
                 // Zobrazení jednotky minimální hodnoty
                 PreciseUnitView {
                     valueLabel?(minValue)
                 }
                 .frame(
-                    width: maxLabelWidth,
+                    width: maxLabelWidth(fromHeight: geometry.size.height),
                     height: maxUnitHeight(fromHeight: geometry.size.height)
                 )
                 .offset(x: minBoundaryOffset)
@@ -81,21 +80,30 @@ struct PreciseAxisView<UnitLabel: View>: View, Animatable {
                     valueLabel?(maxValue)
                 }
                 .frame(
-                    width: maxLabelWidth,
+                    width: maxLabelWidth(fromHeight: geometry.size.height),
                     height: maxUnitHeight(fromHeight: geometry.size.height)
                 )
                 .offset(x: maxBoundaryOffset)
+                
+                // Středový bod
+                Rectangle().frame(width: 1, height: geometry.size.height * 0.8).foregroundColor(.blue)
             }
         }
         .clipShape(Rectangle())
     }
     
-    private var maxLabelWidth: CGFloat {
-        truncScale < 1.15 ?
-            (4.8 * designUnit) :
-            (truncScale < 3.0 ?
-                (designUnit * 1.8) :
-                (designUnit * 0.8))
+    private func maxLabelWidth(fromHeight height: CGFloat) -> CGFloat {
+        // Jakýkoli index nedělitelný 5ti
+        let minUnitHeight = minUnitHeightRatio * maxUnitHeight(fromHeight: height)
+        
+        // 1/3 = minimální zobrazitelný rozměr jednotky
+        if minUnitHeight > (1/3) {
+            return truncScale < 3 ?
+                designUnit * 1.8 : designUnit * 0.8
+        }
+        else {
+            return designUnit * 4.8
+        }
     }
     
     private func maxLabelHeight(fromHeight height: CGFloat) -> CGFloat {
@@ -190,10 +198,14 @@ struct PreciseAxisView<UnitLabel: View>: View, Animatable {
         return CGFloat(numberOfUnits(fromWidth: width)) * designUnit
     }
     
+    private var minUnitHeightRatio: CGFloat {
+        let height = (truncScale - 1) / 3
+        return height < 1 ? height : 1
+    }
+    
     public func unitHeightRatio(forIndex index: Int) -> CGFloat {
         if index % 5 != 0 {
-            let height = (truncScale - 1) / 3
-            return height < 1 ? height : 1
+            return minUnitHeightRatio
         }
         //
         return 1
@@ -205,6 +217,18 @@ struct PreciseAxisView<UnitLabel: View>: View, Animatable {
     
     public func unitHeight(forIndex index: Int, withFrameSize frame: CGSize) -> CGFloat {
         unitHeightRatio(forIndex: relativeIndex(forIndex: index, withWidth: frame.width)) * maxUnitHeight(fromHeight: frame.height)
+    }
+    
+    public func isUnitOverlapped(ofIndex index: Int, withFrameSize frame: CGSize) -> Bool {
+        if maxBoundaryOffset - unitOffset(forIndex: index, withWidth: frame.width) < maxLabelWidth(fromHeight: frame.height) {
+            return true
+        }
+        
+        if unitOffset(forIndex: index, withWidth: frame.width) - minBoundaryOffset < maxLabelWidth(fromHeight: frame.height) {
+            return true
+        }
+        
+        return false
     }
     
     public func isUnitVisible(ofIndex index: Int, withWidth width: CGFloat) -> Bool {

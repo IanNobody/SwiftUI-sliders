@@ -55,76 +55,86 @@ struct PreciseAxis2DView<ValueLabel:View>: View, Animatable {
                 ForEach(0..<numberOfUnits(fromWidth: geometry.size.width), id: \.self) { index in
                     //
                     if isUnitVisible(ofIndex: index, withWidth: geometry.size.width) {
-                        PreciseUnit2DView(isActive: active, unitHeight: unitHeight(forIndex: index, withFrameSize: geometry.size), valueLabel: {
-                                    if relativeIndex(forIndex: index, withWidth: geometry.size.width) % 5 == 0 {
+                        PreciseUnit2DView(isActive: active, unitHeight: unitHeight(forIndex: index, withFrameSize: geometry.size), hasValue: hasUnitValue(ofIndex: index, withFrameSize: geometry.size), valueLabel: {
+                            if hasUnitValue(ofIndex: index, withFrameSize: geometry.size) {
                                         valueLabel?(unitValue(forIndex: index, withWidth: geometry.size.width))
+                                            .zIndex(1)
                                     }
                                 }
                             )
                             .frame(
-                                width: maxLabelWidth,
+                                width: maxLabelWidth(fromHeight: geometry.size.height),
                                 height: axisHeight(fromFrameHeight: geometry.size.height)
                             )
                             .offset(
-                                x: unitOffset(forIndex: index, withWidth: geometry.size.width),
-                                y: active ?
-                                // TODO: Má tato konstanta opodstatnění?
-                                    2.5 :
-                                    .zero
+                                x: unitOffset(forIndex: index, withWidth: geometry.size.width)
                             )
                     }
                 }
                 .frame(
                     width: geometry.size.width,
                     height: axisHeight(fromFrameHeight: geometry.size.height),
-                    alignment: active ?
-                        .top :
-                        .center
+                    alignment: .center
                 )
                 //
                 
-                PreciseUnit2DView(isActive: active, unitHeight: maxUnitHeight(fromHeight: geometry.size.height), valueLabel: {
+                PreciseUnit2DView(
+                    isActive: active,
+                    unitHeight: maxUnitHeight(fromHeight: geometry.size.height),
+                    hasValue: true,
+                    valueLabel: {
                         valueLabel?(maxValue)
                     }
                 )
                 .frame(
-                    width: maxLabelWidth,
+                    width: maxLabelWidth(fromHeight: geometry.size.height),
                     height: axisHeight(fromFrameHeight: geometry.size.height)
                 )
-                .offset(
-                    x: maxBoundaryOffset,
-                    y: active ?
-                    // TODO: Má tato konstanta opodstatnění?
-                        2.5 :
-                        .zero
-                )
+                .offset(x: maxBoundaryOffset)
                 
-                PreciseUnit2DView(isActive: active, unitHeight: maxUnitHeight(fromHeight: geometry.size.height), valueLabel: {
+                PreciseUnit2DView(
+                    isActive: active,
+                    unitHeight: maxUnitHeight(fromHeight: geometry.size.height),
+                    hasValue: true,
+                    valueLabel: {
                         valueLabel?(minValue)
                     }
                 )
                 .frame(
-                    width: maxLabelWidth,
+                    width: maxLabelWidth(fromHeight: geometry.size.height),
                     height: axisHeight(fromFrameHeight: geometry.size.height)
                 )
-                .offset(
-                    x: minBoundaryOffset,
-                    y: active ?
-                    // TODO: Má tato konstanta opodstatnění?
-                        2.5 :
-                        .zero
-                )
+                .offset(x: minBoundaryOffset)
             }
             .clipShape(Rectangle())
         }
     }
+    
+    private func hasUnitValue(ofIndex index: Int, withFrameSize frame: CGSize) -> Bool {
+        (
+            truncScale > 4 ||
+            relativeIndex(
+                forIndex: index,
+                withWidth: frame.width
+            ) % 5 == 0
+        ) &&
+        !isUnitOverlapped(ofIndex: index, withFrameSize: frame)
+    }
+    
+    public func isUnitOverlapped(ofIndex index: Int, withFrameSize frame: CGSize) -> Bool {
+        if maxBoundaryOffset - unitOffset(forIndex: index, withWidth: frame.width) < maxLabelWidth(fromHeight: frame.height) {
+            return true
+        }
+        
+        if unitOffset(forIndex: index, withWidth: frame.width) - minBoundaryOffset < maxLabelWidth(fromHeight: frame.height) {
+            return true
+        }
+        
+        return false
+    }
 
-    private var maxLabelWidth: CGFloat {
-        truncScale < 1.15 ?
-            (4.8 * designUnit) :
-            (truncScale < 3.0 ?
-                (designUnit * 1.8) :
-                (designUnit * 0.8))
+    private func maxLabelWidth(fromHeight height: CGFloat) -> CGFloat {
+        return designUnit * 4.8
     }
     
     // TODO: Ošetřit dělení nulou
@@ -220,7 +230,7 @@ struct PreciseAxis2DView<ValueLabel:View>: View, Animatable {
     }
  
     private func maxUnitHeight(fromHeight height: CGFloat) -> CGFloat {
-        active ? axisHeight(fromFrameHeight: height) * 0.4 : axisHeight(fromFrameHeight: height) * 0.8
+        active ? axisHeight(fromFrameHeight: height) * 0.6 : axisHeight(fromFrameHeight: height) * 0.8
     }
     
     public func isUnitVisible(ofIndex index: Int, withWidth width: CGFloat) -> Bool {
@@ -247,10 +257,14 @@ struct PreciseAxis2DView<ValueLabel:View>: View, Animatable {
         }
     }
     
+    private var minUnitHeightRatio: CGFloat {
+        let height = (truncScale - 1) / 3
+        return height < 1 ? height : 1
+    }
+    
     public func unitHeightRatio(forIndex index: Int) -> CGFloat {
         if index % 5 != 0 {
-            let height = (truncScale - 1) / 3
-            return height < 1 ? height : 1
+            return minUnitHeightRatio
         }
         //
         return 1
