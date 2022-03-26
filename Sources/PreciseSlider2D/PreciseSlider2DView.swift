@@ -8,67 +8,36 @@
 import SwiftUI
 
 struct PreciseSlider2D<Content:View>: View {
+    @Environment(\.preciseSlider2DStyle) var style
+    
     @ObservedObject var axisX: PreciseAxis2DViewModel
     @ObservedObject var axisY: PreciseAxis2DViewModel
     
-    @ViewBuilder let content: (_ scale: CGFloat) -> Content
+    @ViewBuilder let content: (_ size: CGSize, _ scale: CGSize) -> Content
     
+    // TODO: Opravit orientaci os
+    // TODO: Opravit "natahování" mimo hranici osy
     var body: some View {
         GeometryReader { geometry in
             ZStack {
-                ZStack {
-                    content(axisX.scale)
-                        .frame(
-                            width:
-                                contentSize(fromFrameSize: geometry.size).width,
-                            height:
-                                contentSize(fromFrameSize: geometry.size).height
-                        )
-                        .offset(
-                            x: xOffsetTranslation(fromFrameSize: geometry.size),
-                            y: -yOffsetTranslation(fromFrameSize: geometry.size)
-                        )
-                        .scaleEffect(.init(width: axisX.scale, height: axisY.scale))
-                    
-                    Rectangle()
-                        .frame(width: 1, height: 20)
-                        .overlay(
-                            content(axisX.scale)
-                                .frame(
-                                    width:
-                                        contentSize(fromFrameSize: geometry.size).width,
-                                    height:
-                                        contentSize(fromFrameSize: geometry.size).height
-                                )
-                                .offset(
-                                    x: xOffsetTranslation(fromFrameSize: geometry.size),
-                                    y: -yOffsetTranslation(fromFrameSize: geometry.size)
-                                )
-                                .scaleEffect(.init(width: axisX.scale, height: axisY.scale))
-                        )
-                        .clipShape(Rectangle())
-                        .colorInvert()
-                    Rectangle()
-                        .frame(width: 20, height: 1)
-                        .overlay(
-                            content(axisX.scale)
-                                .frame(
-                                    width:
-                                        contentSize(fromFrameSize: geometry.size).width,
-                                    height:
-                                        contentSize(fromFrameSize: geometry.size).height
-                                )
-                                .offset(
-                                    x: xOffsetTranslation(fromFrameSize: geometry.size),
-                                    y: -yOffsetTranslation(fromFrameSize: geometry.size)
-                                )
-                                .scaleEffect(.init(width: axisX.scale, height: axisY.scale))
-                        )
-                        .clipShape(Rectangle())
-                        .colorInvert()
-                }
-                .frame(width: geometry.size.width, height: geometry.size.height, alignment: .topLeading)
-                .background(.gray)
+                PreciseSliderContentView(
+                    scale: CGSize(width: axisX.scale, height: axisY.scale),
+                    offset: CGSize(
+                        width: xOffsetTranslation(fromFrameSize: geometry.size),
+                        height: -yOffsetTranslation(fromFrameSize: geometry.size)
+                    ),
+                    content: content
+                )
+                .frame(
+                    width:
+                        contentSize(fromFrameSize: geometry.size).width,
+                    height:
+                        contentSize(fromFrameSize: geometry.size).height
+                )
+                .offset(
+                    x: contentOffset(fromFrameSize: geometry.size).width,
+                    y: contentOffset(fromFrameSize: geometry.size).height
+                )
                 .gesture(
                     DragGesture()
                         .onChanged { gesture in
@@ -97,43 +66,40 @@ struct PreciseSlider2D<Content:View>: View {
                 )
                 
                 // Osa Y
-                ZStack {
-                    PreciseAxis2DView(maxValue: axisY.maxValue, minValue: axisY.minValue, value: axisY.value, truncScale: axisY.truncScale, isInfinite: axisY.isInfinite, isActive: axisY.active, minDesignValue: minYValue(fromFrameSize: geometry.size), maxDesignValue: maxYValue(fromFrameSize: geometry.size), defaultStep: axisY.unitSize, scaleBase: axisY.scaleBase, valueLabel: { value in
-                            Text("\(Int(value))")
-                                .rotationEffect(.degrees(-90))
-                                .foregroundColor(.white)
-                                .font(
-                                    .system(size: 7, design: .rounded)
-                                )
+                PreciseAxis2DView(maxValue: axisY.maxValue, minValue: axisY.minValue, value: axisY.value, truncScale: axisY.truncScale, isInfinite: axisY.isInfinite, isActive: axisY.active, minDesignValue: minYValue(fromFrameSize: geometry.size), maxDesignValue: maxYValue(fromFrameSize: geometry.size), defaultStep: axisY.unitSize, scaleBase: axisY.scaleBase, valueLabel: { value in
+                        Text("\(Int(value))")
+                            .rotationEffect(.degrees(-90))
+                            .foregroundColor(.white)
+                            .font(
+                                .system(size: 7, design: .rounded)
+                            )
+                    }
+                )
+                .rotationEffect(.degrees(90))
+                .frame(width: contentSize(fromFrameSize: geometry.size).height, height: geometry.size.width - contentSize(fromFrameSize: geometry.size).width)
+                .gesture(
+                    DragGesture()
+                        .onChanged { gesture in
+                            axisY.activeMove(byValue: gesture.translation.height * gestureYCoefitient(fromFrameSize: geometry.size))
                         }
-                    )
-                    .rotationEffect(.degrees(90))
-                    .frame(width: contentSize(fromFrameSize: geometry.size).height, height: geometry.size.width)
-                    .gesture(
-                        DragGesture()
-                            .onChanged { gesture in
-                                axisY.activeMove(byValue: gesture.translation.height * gestureYCoefitient(fromFrameSize: geometry.size))
-                            }
-                            .onEnded { gesture in
-                                axisY.animateMomentum(byValue: (gesture.predictedEndTranslation.height - gesture.translation.height) * gestureYCoefitient(fromFrameSize: geometry.size), duration: 0.5)
+                        .onEnded { gesture in
+                            axisY.animateMomentum(byValue: (gesture.predictedEndTranslation.height - gesture.translation.height) * gestureYCoefitient(fromFrameSize: geometry.size), duration: 0.5)
 
-                                axisY.editingValueEnded()
-                            }
-                    )
-                    .gesture(
-                        MagnificationGesture()
-                            .onChanged { gesture in
-                                axisY.zoom(byScale: gesture.magnitude)
-                            }
-                            .onEnded { _ in
-                                axisY.editingScaleEnded()
-                            }
-                    )
-                    .offset(y: -contentOffset(fromFrameSize: geometry.size).height)
-                }
-                .frame(
-                    width: geometry.size.width,
-                    height: geometry.size.height
+                            axisY.editingValueEnded()
+                        }
+                )
+                .gesture(
+                    MagnificationGesture()
+                        .onChanged { gesture in
+                            axisY.zoom(byScale: gesture.magnitude)
+                        }
+                        .onEnded { _ in
+                            axisY.editingScaleEnded()
+                        }
+                )
+                .offset(
+                    x: contentSize(fromFrameSize: geometry.size).width / 2,
+                    y: (contentSize(fromFrameSize: geometry.size).height - geometry.size.height) / 2
                 )
                 
                 // Osa X
@@ -148,7 +114,7 @@ struct PreciseSlider2D<Content:View>: View {
                         }
                     )
                         .rotationEffect(.degrees(-180))
-                        .frame(width: contentSize(fromFrameSize: geometry.size).width, height: contentSize(fromFrameSize: geometry.size).height)
+                        .frame(width: contentSize(fromFrameSize: geometry.size).width, height: geometry.size.height - contentSize(fromFrameSize: geometry.size).height)
                         .gesture(
                             DragGesture()
                                 .onChanged { gesture in
@@ -177,24 +143,14 @@ struct PreciseSlider2D<Content:View>: View {
                 )
                 
                 Rectangle()
-                    .frame(width:
-                            cornerSize(
-                                fromWidth: geometry.size.width,
-                                fromHeight: geometry.size.height
-                            ).width,
-                           height:
-                            cornerSize(
-                                fromWidth: geometry.size.width,
-                                fromHeight: geometry.size.height
-                            ).height
+                    .frame(
+                        width:
+                            cornerSize(fromFrameSize: geometry.size).width,
+                        height:
+                            cornerSize(fromFrameSize: geometry.size).height
                     )
-                    .offset(
-                        cornerOffset(
-                            fromWidth: geometry.size.width,
-                            fromHeight: geometry.size.height
-                        )
-                    )
-                    .foregroundColor(.black)
+                    .offset(cornerOffset(fromFrameSize: geometry.size))
+                    .foregroundColor(style.axisBackgroundColor)
             }
             .clipShape(Rectangle())
         }
@@ -218,34 +174,35 @@ struct PreciseSlider2D<Content:View>: View {
         }
     }
     
-    private func cornerOffset(fromWidth width: CGFloat, fromHeight height: CGFloat) -> CGSize {
-        let x = width / 2
-        let y = height / 2
+    private func cornerOffset(fromFrameSize frame: CGSize) -> CGSize {
+        let x = frame.width / 2
+        let y = frame.height / 2
+        let axisSize = axisHeight(fromFrameSize: frame) / 2
         
         return .init(
-            width: x - (width / (axisY.active ? 20.0 : 40.0)),
-            height: y - (height / (axisX.active ? 20.0 : 40.0))
+            width: x - (axisSize * (axisY.active ? 2 : 1)),
+            height: y - (axisSize * (axisX.active ? 2 : 1))
         )
     }
     
-    private func cornerSize(fromWidth width: CGFloat, fromHeight height: CGFloat) -> CGSize {
+    private func cornerSize(fromFrameSize frame: CGSize) -> CGSize {
         return .init(
-            width: width / (axisY.active ? 10.0 : 20.0),
-            height: height / (axisX.active ? 10.0 : 20.0)
+            width: axisHeight(fromFrameSize: frame) * (axisY.active ? 2 : 1),
+            height: axisHeight(fromFrameSize: frame) * (axisX.active ? 2 : 1)
         )
     }
     
     private func contentSize(fromFrameSize frame: CGSize) -> CGSize {
         return .init(
-            width: frame.width * 0.95,
-            height: frame.height * 0.95
+            width: frame.width - axisHeight(fromFrameSize: frame),
+            height: frame.height - axisHeight(fromFrameSize: frame)
         )
     }
     
     private func contentOffset(fromFrameSize frame: CGSize) -> CGSize {
         return .init(
-            width: frame.width * 0.025,
-            height: frame.height * 0.025
+            width: -(axisHeight(fromFrameSize: frame) / 2),
+            height: -(axisHeight(fromFrameSize: frame) / 2)
         )
     }
     
@@ -272,17 +229,24 @@ struct PreciseSlider2D<Content:View>: View {
     private func gestureYCoefitient(fromFrameSize frame: CGSize) -> CGFloat {
         (axisY.maxValue - axisY.minValue) / (maxYValue(fromFrameSize: frame) - minYValue(fromFrameSize: frame))
     }
+    
+    private func axisHeight(fromFrameSize frame: CGSize) -> CGFloat {
+        min(frame.width, frame.height) * 0.05
+    }
 }
 
 struct PreciseSlider2D_Previews: PreviewProvider {
     static var previews: some View {
         PreciseSlider2D(
-            axisX: PreciseAxis2DViewModel(),
+            axisX: PreciseAxis2DViewModel(minScale: 0.5),
             axisY: PreciseAxis2DViewModel(),
-            content: { scale in
+            content: { size, _ in
                 ZStack {
                     Rectangle()
                         .foregroundColor(.brown)
+                    Rectangle()
+                        .foregroundColor(.blue)
+                        .frame(height: size.height / 3)
                     Rectangle()
                         .foregroundColor(.red)
                         .frame(width: 1, height: 20)

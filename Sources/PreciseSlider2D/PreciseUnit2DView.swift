@@ -8,26 +8,29 @@
 import SwiftUI
 
 struct PreciseUnit2DView<ValueLabel: View>: View {
+    @Environment(\.preciseSlider2DStyle) var style
+    
     let isActive: Bool
     let unitHeight: CGFloat
-    let hasValue: Bool
+    let isHighlited: Bool
     @ViewBuilder let valueLabel: () -> ValueLabel
     
-    // TODO: Volitelné barvy
     var body: some View {
         GeometryReader { geometry in
             VStack(spacing: 0) {
                 if isActive {
                     Spacer()
                         .frame(height: geometry.size.height * 0.1)
-                        .border(.blue)
                 }
                 
                 Rectangle()
                     .frame(maxWidth: 1, maxHeight: unitHeight)
-                    .foregroundColor(.white)
+                    .foregroundColor(
+                        isHighlited ?
+                            style.highlightedUnitColor : style.defaultUnitColor
+                    )
                 
-                if hasValue {
+                if isHighlited {
                     valueLabel()
                         .frame(
                             width: geometry.size.width,
@@ -47,7 +50,7 @@ struct PreciseUnit2DView<ValueLabel: View>: View {
 
 struct PreciseUnit2DView_Previews: PreviewProvider {
     static var previews: some View {
-        PreciseUnit2DView(isActive: true, unitHeight: 15, hasValue: true, valueLabel: {
+        PreciseUnit2DView(isActive: true, unitHeight: 15, isHighlited: true, valueLabel: {
             Text("100")
                 .font(.system(size: 5))
                 .rotationEffect(.degrees(-90))

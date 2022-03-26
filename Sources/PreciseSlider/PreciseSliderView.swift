@@ -9,9 +9,9 @@ import SwiftUI
 
 public struct PreciseSliderView<ValueLabel: View>: View {
     @ObservedObject public var viewModel: PreciseSliderViewModel
-    @ViewBuilder public var valueLabel: (_ value: CGFloat) -> ValueLabel?
+    @ViewBuilder public var valueLabel: (_ value: CGFloat, _ stepSize: CGFloat) -> ValueLabel?
     
-    public init(viewModel: PreciseSliderViewModel, valueLabel: @escaping (_ value: CGFloat) -> ValueLabel?) {
+    public init(viewModel: PreciseSliderViewModel, valueLabel: @escaping (_ value: CGFloat, _ stepSize: CGFloat) -> ValueLabel?) {
         self.viewModel = viewModel
         self.valueLabel = valueLabel
     }
@@ -24,6 +24,7 @@ public struct PreciseSliderView<ValueLabel: View>: View {
                 PreciseAxisView(maxValue: viewModel.maxValue, minValue: viewModel.minValue, value: viewModel.value, truncScale: viewModel.truncScale, isInfinite: viewModel.isInfinite, maxDesignValue: maxDesignValue(fromWidth: geometry.size.width), minDesignValue: minDesignValue(fromWidth: geometry.size.width), scaleBase: viewModel.scaleBase, defaultStep: viewModel.defaultStep, valueLabel: valueLabel)
             }
             // Výběr hodnoty
+            // TODO: Ošetřit minimální délky gest a animací
             .gesture(
                 DragGesture()
                     .onChanged { gesture in
@@ -64,7 +65,7 @@ public struct PreciseSliderView<ValueLabel: View>: View {
 
 struct PreciseSliderView_Previews: PreviewProvider {
     static var previews: some View {
-        PreciseSliderView(viewModel: PreciseSliderViewModel(), valueLabel: { value in
+        PreciseSliderView(viewModel: PreciseSliderViewModel(), valueLabel: { value, step in
             Text("\(value)")
                 .background(.black)
                 .font(.system(size: 7, design: .rounded))

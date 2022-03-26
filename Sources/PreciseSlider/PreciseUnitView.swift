@@ -8,6 +8,8 @@
 import SwiftUI
 
 struct PreciseUnitView<UnitLabel: View>: View {
+    @Environment(\.preciseSliderStyle) var style
+    let isHighlited: Bool
     @ViewBuilder let unitLabel: () -> UnitLabel
     
     var body: some View {
@@ -15,11 +17,15 @@ struct PreciseUnitView<UnitLabel: View>: View {
             ZStack {
                 Rectangle()
                     .frame(width: 1)
-                    .foregroundColor(.white)
-                unitLabel()
-                    // TODO: Volba vlastní barvy
-                    .background(.black)
-                    .frame(height: geometry.size.height / 3)
+                    .foregroundColor(
+                        isHighlited ?
+                            style.highlitedUnitColor : style.defaultUnitColor
+                    )
+                if isHighlited {
+                    unitLabel()
+                        .background(style.backgroundColor)
+                        .frame(height: geometry.size.height / 3)
+                }
             }
             .frame(
                 width: geometry.size.width,
@@ -31,9 +37,9 @@ struct PreciseUnitView<UnitLabel: View>: View {
 
 struct PreciseUnitView_Previews: PreviewProvider {
     static var previews: some View {
-        PreciseUnitView(unitLabel: {
+        PreciseUnitView(isHighlited: true) {
             Text("0")
                 .foregroundColor(.white)
-        })
+        }
     }
 }

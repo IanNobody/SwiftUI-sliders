@@ -8,6 +8,8 @@
 import SwiftUI
 
 struct PreciseAxisView<UnitLabel: View>: View, Animatable {
+    @Environment(\.preciseSliderStyle) var style
+    
     let maxValue: CGFloat
     let minValue: CGFloat
     
@@ -23,9 +25,9 @@ struct PreciseAxisView<UnitLabel: View>: View, Animatable {
     let scaleBase: CGFloat
     let stepSize: CGFloat
     
-    @ViewBuilder let valueLabel: ((_ value: CGFloat) -> UnitLabel)?
+    @ViewBuilder let valueLabel: ((_ value: CGFloat, _ stepSize: CGFloat) -> UnitLabel)?
     
-    init(maxValue: CGFloat, minValue: CGFloat, value: CGFloat, truncScale: CGFloat, isInfinite: Bool, maxDesignValue: CGFloat, minDesignValue: CGFloat, scaleBase: CGFloat, defaultStep: CGFloat, valueLabel: ((_ value: CGFloat) -> UnitLabel)?) {
+    init(maxValue: CGFloat, minValue: CGFloat, value: CGFloat, truncScale: CGFloat, isInfinite: Bool, maxDesignValue: CGFloat, minDesignValue: CGFloat, scaleBase: CGFloat, defaultStep: CGFloat, valueLabel: ((_ value: CGFloat, _ stepSize: CGFloat) -> UnitLabel)?) {
         self.maxValue = maxValue
         self.minValue = minValue
         self.animatableData = value
@@ -40,23 +42,19 @@ struct PreciseAxisView<UnitLabel: View>: View, Animatable {
     
     // TODO: Vyřešit nekonečnost osy (aktuálně hrozí přetečení relativního indexu)
     // TODO: Používat vlastní GeometryReader nebo si ho nechat předávat od parent View?
-    // TODO: Volitelné barvy
     var body: some View {
         GeometryReader { geometry in
             ZStack {
                 // Pozadí
                 Rectangle()
-                    .foregroundColor(.black)
+                    .foregroundColor(style.backgroundColor)
                 //
                 ForEach(0..<numberOfUnits(fromWidth: geometry.size.width), id: \.self) { index in
                     if isUnitVisible(ofIndex: index, withWidth: geometry.size.width)
                     {
-                        PreciseUnitView {
-                            if (truncScale > 3.0 ||
-                                relativeIndex(forIndex: index, withWidth: geometry.size.width) % 5 == 0) && !isUnitOverlapped(ofIndex: index, withFrameSize: geometry.size) {
-                                valueLabel?(unitValue(forIndex: index, withWidth: geometry.size.width))
+                        PreciseUnitView(isHighlited: isUnitHighlited(ofIndex: index, withFrameSize: geometry.size)) {
+                                valueLabel?(unitValue(forIndex: index, withWidth: geometry.size.width), truncScale > 3 ? unit : 5 * unit)
                                 .zIndex(1)
-                            }
                         }
                         .frame(width: maxLabelWidth(fromHeight: geometry.size.height), height: unitHeight(forIndex: index, withFrameSize: geometry.size))
                         .offset(
@@ -66,8 +64,8 @@ struct PreciseAxisView<UnitLabel: View>: View, Animatable {
                 }
                 
                 // Zobrazení jednotky minimální hodnoty
-                PreciseUnitView {
-                    valueLabel?(minValue)
+                PreciseUnitView(isHighlited: true) {
+                    valueLabel?(minValue, truncScale > 3 ? unit : 5 * unit)
                 }
                 .frame(
                     width: maxLabelWidth(fromHeight: geometry.size.height),
@@ -76,8 +74,8 @@ struct PreciseAxisView<UnitLabel: View>: View, Animatable {
                 .offset(x: minBoundaryOffset)
                 
                 // Zobrazení jednotky maximální hodnoty
-                PreciseUnitView {
-                    valueLabel?(maxValue)
+                PreciseUnitView(isHighlited: true) {
+                    valueLabel?(maxValue, truncScale > 3 ? unit : 5 * unit)
                 }
                 .frame(
                     width: maxLabelWidth(fromHeight: geometry.size.height),
@@ -86,10 +84,18 @@ struct PreciseAxisView<UnitLabel: View>: View, Animatable {
                 .offset(x: maxBoundaryOffset)
                 
                 // Středový bod
-                Rectangle().frame(width: 1, height: geometry.size.height * 0.8).foregroundColor(.blue)
+                Rectangle().frame(width: 1, height: geometry.size.height * 0.8).foregroundColor(style.axisPointerColor)
             }
         }
         .clipShape(Rectangle())
+    }
+    
+    private func isUnitHighlited(ofIndex index: Int, withFrameSize frame: CGSize) -> Bool {
+        (
+            truncScale > 3.0
+            || relativeIndex(forIndex: index, withWidth: frame.width) % 5 == 0
+        )
+        && !isUnitOverlapped(ofIndex: index, withFrameSize: frame)
     }
     
     private func maxLabelWidth(fromHeight height: CGFloat) -> CGFloat {
@@ -249,7 +255,7 @@ struct PreciseAxisView<UnitLabel: View>: View, Animatable {
 
 struct PreciseAxisView_Previews: PreviewProvider {
     static var previews: some View {
-        PreciseAxisView(maxValue: 200.0, minValue: -200.0, value: 0, truncScale: 1, isInfinite: false, maxDesignValue: 300, minDesignValue: -300, scaleBase: 1.0, defaultStep: 4, valueLabel: { value in
+        PreciseAxisView(maxValue: 200.0, minValue: -200.0, value: 0, truncScale: 1, isInfinite: false, maxDesignValue: 300, minDesignValue: -300, scaleBase: 1.0, defaultStep: 4, valueLabel: { value, step in
                 Text("\(value)")
                     .background(.black)
                     .font(.system(size:7, design: .rounded))

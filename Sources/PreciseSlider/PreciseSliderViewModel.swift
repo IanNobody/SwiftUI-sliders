@@ -129,7 +129,6 @@ open class PreciseSliderViewModel: ObservableObject {
         }
         
         scale = newScale
-        isEditing = true
     }
     
     open func animateMomentum(byValue difference: CGFloat, duration: CGFloat) {
@@ -171,6 +170,5 @@ open class PreciseSliderViewModel: ObservableObject {
     
     public func editingScaleEnded() {
         prevScale = scale
-        isEditing = false
     }
 }

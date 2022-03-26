@@ -8,6 +8,8 @@
 import SwiftUI
 
 struct PreciseAxis2DView<ValueLabel:View>: View, Animatable {
+    @Environment(\.preciseSlider2DStyle) var style
+    
     let maxValue: CGFloat
     let minValue: CGFloat
     
@@ -50,25 +52,23 @@ struct PreciseAxis2DView<ValueLabel:View>: View, Animatable {
                             fromFrameHeight: geometry.size.height
                         ),
                         alignment: .leading)
-                    .foregroundColor(.black)
+                    .foregroundColor(style.axisBackgroundColor)
                 //
                 ForEach(0..<numberOfUnits(fromWidth: geometry.size.width), id: \.self) { index in
                     //
                     if isUnitVisible(ofIndex: index, withWidth: geometry.size.width) {
-                        PreciseUnit2DView(isActive: active, unitHeight: unitHeight(forIndex: index, withFrameSize: geometry.size), hasValue: hasUnitValue(ofIndex: index, withFrameSize: geometry.size), valueLabel: {
-                            if hasUnitValue(ofIndex: index, withFrameSize: geometry.size) {
-                                        valueLabel?(unitValue(forIndex: index, withWidth: geometry.size.width))
-                                            .zIndex(1)
-                                    }
-                                }
-                            )
-                            .frame(
-                                width: maxLabelWidth(fromHeight: geometry.size.height),
-                                height: axisHeight(fromFrameHeight: geometry.size.height)
-                            )
-                            .offset(
-                                x: unitOffset(forIndex: index, withWidth: geometry.size.width)
-                            )
+                        PreciseUnit2DView(isActive: active, unitHeight: unitHeight(forIndex: index, withFrameSize: geometry.size), isHighlited: isUnitHighlighted(ofIndex: index, withFrameSize: geometry.size), valueLabel: {
+                                valueLabel?(unitValue(forIndex: index, withWidth: geometry.size.width))
+                                    .zIndex(1)
+                            }
+                        )
+                        .frame(
+                            width: maxLabelWidth(fromHeight: geometry.size.height),
+                            height: axisHeight(fromFrameHeight: geometry.size.height)
+                        )
+                        .offset(
+                            x: unitOffset(forIndex: index, withWidth: geometry.size.width)
+                        )
                     }
                 }
                 .frame(
@@ -81,7 +81,7 @@ struct PreciseAxis2DView<ValueLabel:View>: View, Animatable {
                 PreciseUnit2DView(
                     isActive: active,
                     unitHeight: maxUnitHeight(fromHeight: geometry.size.height),
-                    hasValue: true,
+                    isHighlited: true,
                     valueLabel: {
                         valueLabel?(maxValue)
                     }
@@ -95,7 +95,7 @@ struct PreciseAxis2DView<ValueLabel:View>: View, Animatable {
                 PreciseUnit2DView(
                     isActive: active,
                     unitHeight: maxUnitHeight(fromHeight: geometry.size.height),
-                    hasValue: true,
+                    isHighlited: true,
                     valueLabel: {
                         valueLabel?(minValue)
                     }
@@ -105,12 +105,20 @@ struct PreciseAxis2DView<ValueLabel:View>: View, Animatable {
                     height: axisHeight(fromFrameHeight: geometry.size.height)
                 )
                 .offset(x: minBoundaryOffset)
+                
+                // Středový bod
+                Rectangle()
+                    .frame(
+                        width: 1,
+                        height: axisHeight(fromFrameHeight: geometry.size.height)
+                    )
+                    .foregroundColor(style.axisPointerColor)
             }
             .clipShape(Rectangle())
         }
     }
     
-    private func hasUnitValue(ofIndex index: Int, withFrameSize frame: CGSize) -> Bool {
+    private func isUnitHighlighted(ofIndex index: Int, withFrameSize frame: CGSize) -> Bool {
         (
             truncScale > 4 ||
             relativeIndex(
@@ -250,10 +258,10 @@ struct PreciseAxis2DView<ValueLabel:View>: View, Animatable {
     
     private func axisHeight(fromFrameHeight frame: CGFloat) -> CGFloat {
         if active {
-            return frame / 10
+            return frame * 2
         }
         else {
-            return frame / 20
+            return frame
         }
     }
     
