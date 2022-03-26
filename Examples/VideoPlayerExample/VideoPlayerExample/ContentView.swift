@@ -23,10 +23,10 @@ struct ContentView: View {
             .frame(maxWidth: .infinity, alignment: .leading)
             Spacer()
             if videoViewModel.player != nil,
-               videoViewModel.slider != nil {
+               let slider = videoViewModel.slider {
                 VideoPlayer(
                     videoViewModel: videoViewModel,
-                    sliderViewModel: videoViewModel.slider!
+                    sliderViewModel: slider
                 )
             }
             else if videoViewModel.isLoading {
@@ -55,7 +55,7 @@ struct ContentView: View {
                     videoViewModel.isLoading = didSelectItems
                     
                     if didSelectItems {
-                        videoViewModel.player = nil
+                        videoViewModel.dropVideo()
                     }
                 },
                 didLoadVideo: { videoUrl in

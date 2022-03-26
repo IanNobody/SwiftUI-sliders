@@ -10,6 +10,8 @@ import AVKit
 import PreciseSlider
 
 struct VideoPlayer: View {
+    @Environment(\.colorScheme) var colorScheme
+    
     @ObservedObject var videoViewModel: VideoPlayerViewModel
     @ObservedObject var sliderViewModel: PreciseSliderViewModel
     
@@ -44,9 +46,10 @@ struct VideoPlayer: View {
             //
             PreciseSliderView(
                 viewModel: sliderViewModel,
-                valueLabel: { value in
-                    Text("\(valueToTimeString(value: value))")
+                valueLabel: { value, step in
+                    Text("\(valueToTimeString(value: value, step: step))")
                         .font(.system(size: 9))
+                        .foregroundColor(colorScheme == .dark ? .white : .black)
                 }
             )
             .frame(height: 50)
@@ -63,14 +66,39 @@ struct VideoPlayer: View {
                 
                 videoViewModel.player?.seek(to: .init(seconds: value, preferredTimescale: CMTimeScale(NSEC_PER_SEC)))
             }
+            .preciseSliderStyle(
+                PreciseSliderStyle(
+                    backgroundColor: Color(UIColor.systemBackground),
+                    defaultUnitColor: colorScheme == .dark ? .white : .black
+                )
+            )
         }
     }
     
-    private func valueToTimeString(value: Double) -> String {
+    private func valueToTimeString(value: Double, step: Double) -> String {
         let date = Date(timeIntervalSince1970: value)
         let formatter = DateFormatter()
-        formatter.timeStyle = .medium
-        formatter.dateFormat = "mm:ss.SSS"
+        
+        if step >= 1 {
+            formatter.dateFormat = "m:ss"
+        }
+        else if step >= 0.1 {
+            if videoViewModel.videoDuration > 60 {
+                formatter.dateFormat = "m:ss.SS"
+            }
+            else {
+                formatter.dateFormat = "s.SS"
+            }
+        }
+        else {
+            if videoViewModel.videoDuration > 60 {
+                formatter.dateFormat = "m:ss.SSS"
+            }
+            else {
+                formatter.dateFormat = "s.SSS"
+            }
+        }
+        
         return formatter.string(from: date)
     }
 }
