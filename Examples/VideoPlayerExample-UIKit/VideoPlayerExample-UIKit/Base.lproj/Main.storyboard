@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="20037" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="BYZ-38-t0r">
+    <device id="retina6_1" orientation="portrait" appearance="light"/>
+    <dependencies>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="20020"/>
+        <capability name="Safe area layout guides" minToolsVersion="9.0"/>
+        <capability name="System colors in document resources" minToolsVersion="11.0"/>
+        <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
+    </dependencies>
+    <scenes>
+        <!--Main View Controller-->
+        <scene sceneID="tne-QT-ifu">
+            <objects>
+                <viewController id="BYZ-38-t0r" customClass="MainViewController" customModule="VideoPlayerExample_UIKit" customModuleProvider="target" sceneMemberID="viewController">
+                    <view key="view" contentMode="scaleToFill" id="mEr-bm-LJD">
+                        <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
+                        <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                        <subviews>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="IaX-Ho-zbu">
+                                <rect key="frame" x="20" y="44" width="118" height="35"/>
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="35" id="jAf-Rm-VrG"/>
+                                </constraints>
+                                <state key="normal" title="Button"/>
+                                <buttonConfiguration key="configuration" style="plain" title="Vybrat video..."/>
+                                <connections>
+                                    <action selector="selectButton:" destination="BYZ-38-t0r" eventType="touchUpInside" id="o01-Gw-UNq"/>
+                                </connections>
+                            </button>
+                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="mm2-3z-0E0">
+                                <rect key="frame" x="0.0" y="87" width="414" height="775"/>
+                                <subviews>
+                                    <button opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="lkH-TO-3tI">
+                                        <rect key="frame" x="157" y="340" width="100" height="95"/>
+                                        <constraints>
+                                            <constraint firstAttribute="width" relation="greaterThanOrEqual" constant="100" id="qtE-Bf-tpL"/>
+                                            <constraint firstAttribute="height" constant="95" id="xMv-HY-lDW"/>
+                                        </constraints>
+                                        <state key="normal" title="Button"/>
+                                        <buttonConfiguration key="configuration" style="plain">
+                                            <backgroundConfiguration key="background" image="play.circle" catalog="system"/>
+                                        </buttonConfiguration>
+                                        <connections>
+                                            <action selector="selectButton:" destination="BYZ-38-t0r" eventType="touchUpInside" id="yqO-2O-brO"/>
+                                        </connections>
+                                    </button>
+                                </subviews>
+                                <constraints>
+                                    <constraint firstItem="lkH-TO-3tI" firstAttribute="centerY" secondItem="mm2-3z-0E0" secondAttribute="centerY" id="PaB-cq-fhk"/>
+                                    <constraint firstItem="lkH-TO-3tI" firstAttribute="centerX" secondItem="mm2-3z-0E0" secondAttribute="centerX" id="dKK-h7-LcN"/>
+                                </constraints>
+                            </view>
+                        </subviews>
+                        <viewLayoutGuide key="safeArea" id="ao1-cp-734"/>
+                        <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+                        <constraints>
+                            <constraint firstItem="mm2-3z-0E0" firstAttribute="top" secondItem="IaX-Ho-zbu" secondAttribute="bottom" constant="8" symbolic="YES" id="ACu-Lc-goJ"/>
+                            <constraint firstAttribute="trailing" secondItem="mm2-3z-0E0" secondAttribute="trailing" id="CaA-8d-4IG"/>
+                            <constraint firstItem="mm2-3z-0E0" firstAttribute="leading" secondItem="mEr-bm-LJD" secondAttribute="leading" id="PUn-oc-RSp"/>
+                            <constraint firstItem="IaX-Ho-zbu" firstAttribute="top" secondItem="ao1-cp-734" secondAttribute="top" id="ZFe-vJ-q5h"/>
+                            <constraint firstItem="ao1-cp-734" firstAttribute="trailing" relation="greaterThanOrEqual" secondItem="IaX-Ho-zbu" secondAttribute="trailing" symbolic="YES" id="taU-98-KVu"/>
+                            <constraint firstItem="IaX-Ho-zbu" firstAttribute="leading" secondItem="mEr-bm-LJD" secondAttribute="leadingMargin" id="xyx-O4-Sg5"/>
+                            <constraint firstItem="mm2-3z-0E0" firstAttribute="bottom" secondItem="ao1-cp-734" secondAttribute="bottom" id="zka-11-q08"/>
+                        </constraints>
+                    </view>
+                    <connections>
+                        <outlet property="contentView" destination="mm2-3z-0E0" id="Bgx-Jx-3be"/>
+                        <outlet property="mainPlayButton" destination="lkH-TO-3tI" id="Uyc-4V-oKJ"/>
+                    </connections>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="dkx-z0-nzr" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="44.927536231884062" y="83.705357142857139"/>
+        </scene>
+    </scenes>
+    <resources>
+        <image name="play.circle" catalog="system" width="128" height="121"/>
+        <systemColor name="systemBackgroundColor">
+            <color white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+        </systemColor>
+    </resources>
+</document>
