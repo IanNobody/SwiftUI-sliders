@@ -21,17 +21,17 @@ public struct PreciseSliderView<ValueLabel: View>: View {
     public var body: some View {
         GeometryReader { geometry in
             ZStack {
-                PreciseAxisView(maxValue: viewModel.maxValue, minValue: viewModel.minValue, value: viewModel.value, truncScale: viewModel.truncScale, isInfinite: viewModel.isInfinite, maxDesignValue: maxDesignValue(fromWidth: geometry.size.width), minDesignValue: minDesignValue(fromWidth: geometry.size.width), scaleBase: viewModel.scaleBase, defaultStep: viewModel.defaultStep, valueLabel: valueLabel)
+                PreciseAxisView(maxValue: viewModel.maxValue, minValue: viewModel.minValue, value: viewModel.value, truncScale: viewModel.truncScale, isInfinite: viewModel.isInfinite, maxDesignValue: maxDesignValue(fromWidth: geometry.size.width), minDesignValue: minDesignValue(fromWidth: geometry.size.width), scaleBase: viewModel.scaleBase, numberOfUnits: viewModel.numberOfUnits, valueLabel: valueLabel)
             }
             // Výběr hodnoty
             // TODO: Ošetřit minimální délky gest a animací
             .gesture(
-                DragGesture()
+                DragGesture(minimumDistance: 0)
                     .onChanged { gesture in
-                        viewModel.move(byValue: gesture.translation.width / gestureCoefitient(fromWidth: geometry.size.width))
+                        viewModel.move(byValue: gesture.translation.width * gestureCoefitient(fromWidth: geometry.size.width))
                     }
                     .onEnded { gesture in
-                        viewModel.animateMomentum(byValue: (gesture.predictedEndTranslation.width - gesture.translation.width) / gestureCoefitient(fromWidth: geometry.size.width), duration: 0.5)
+                        viewModel.animateMomentum(byValue: (gesture.predictedEndTranslation.width - gesture.translation.width) * gestureCoefitient(fromWidth: geometry.size.width), duration: 0.5)
 
                         viewModel.editingValueEnded()
                     }
@@ -59,13 +59,20 @@ public struct PreciseSliderView<ValueLabel: View>: View {
     }
     
     private func gestureCoefitient(fromWidth width: CGFloat) -> CGFloat {
-        (maxDesignValue(fromWidth: width) - minDesignValue(fromWidth: width)) / (viewModel.maxValue - viewModel.minValue)
+        let designRange = maxDesignValue(fromWidth: width) - minDesignValue(fromWidth: width)
+        
+        if designRange > 0 {
+            return (viewModel.maxValue - viewModel.minValue) / designRange
+        }
+        else {
+            return 0
+        }
     }
 }
 
 struct PreciseSliderView_Previews: PreviewProvider {
     static var previews: some View {
-        PreciseSliderView(viewModel: PreciseSliderViewModel(), valueLabel: { value, step in
+        PreciseSliderView(viewModel: PreciseSliderViewModel(isInfinite: true), valueLabel: { value, step in
             Text("\(value)")
                 .background(.black)
                 .font(.system(size: 7, design: .rounded))

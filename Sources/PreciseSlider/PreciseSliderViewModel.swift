@@ -13,7 +13,7 @@ open class PreciseSliderViewModel: ObservableObject {
     @Published public private(set) var scale: Double
     @Published public private(set) var isEditing: Bool = false
     
-    public init(defaultValue: Double = Double.zero, defaultScale: Double = 1.0, minValue: Double = 0, maxValue: Double = 100, minScale: Double = 1.0, maxScale: Double = .infinity, unitSize: Double = 0, isInfinite: Bool = false) {
+    public init(defaultValue: Double = Double.zero, defaultScale: Double = 1.0, minValue: Double = 0, maxValue: Double = 100, minScale: Double = 1.0, maxScale: Double = .infinity, numberOfUnits: Int = 20, isInfinite: Bool = false) {
         self.value = defaultValue
         self.prevValue = defaultValue
         self.scale = defaultScale
@@ -22,7 +22,7 @@ open class PreciseSliderViewModel: ObservableObject {
         self.maxValue = maxValue
         self.minScale = minScale
         self.maxScale = maxScale
-        self.unitSize = unitSize
+        self.numberOfUnits = numberOfUnits * 5
         self.isInfinite = isInfinite
     }
     
@@ -70,12 +70,7 @@ open class PreciseSliderViewModel: ObservableObject {
     
     public var isInfinite: Bool
     
-    // Výchozí vzdálenost mezi jednotkami
-    public var unitSize: CGFloat
-    
-    public var defaultStep: CGFloat {
-        unitSize / 5
-    }
+    public var numberOfUnits: Int
     
     public var truncScale: Double {
         scale / scaleBase
@@ -91,12 +86,22 @@ open class PreciseSliderViewModel: ObservableObject {
     public func move(byValue difference: CGFloat) {
         var newValue = prevValue - (difference / scale)
         
-        if (newValue > maxValue || newValue < minValue) && !isInfinite {
-            let difference = newValue - (newValue > maxValue ? maxValue : minValue)
+        if (newValue > maxValue || newValue < minValue) {
+            if !isInfinite {
+                let difference = newValue - (newValue > maxValue ? maxValue : minValue)
             
-            newValue = newValue > maxValue ?
-                maxValue + pow(abs(difference), 1/2) :
-                minValue - pow(abs(difference), 1/2)
+                newValue = newValue > maxValue ?
+                    maxValue + pow(abs(difference), 1/2) :
+                    minValue - pow(abs(difference), 1/2)
+            }
+            else {
+                if newValue > maxValue {
+                    newValue = (newValue - minValue).truncatingRemainder(dividingBy: (minValue - maxValue)) + minValue
+                }
+                else {
+                    newValue = (newValue - minValue).truncatingRemainder(dividingBy: (minValue - maxValue)) + maxValue
+                }
+            }
         }
         
         value = newValue
@@ -114,7 +119,7 @@ open class PreciseSliderViewModel: ObservableObject {
             value = newValue
         }
         
-        editingValueEnded()
+        prevValue = value
     }
     
     public func zoom(byScale zoom: CGFloat) {
@@ -131,24 +136,24 @@ open class PreciseSliderViewModel: ObservableObject {
         scale = newScale
     }
     
-    open func animateMomentum(byValue difference: CGFloat, duration: CGFloat) {
-        let newValue = value - (difference / scale)
-        
-        if value > minValue && value < maxValue &&
-            newValue > minValue && newValue < maxValue
-            && !isInfinite {
-            withAnimation(.easeOut(duration: duration)) {
-                value = newValue
-                prevValue = newValue
-            }
+    public func zoom(toValue newScale: CGFloat) {
+        if newScale > maxScale {
+            scale = maxScale
         }
-        else if value > minValue && value < maxValue
+        else if newScale < minScale {
+            scale = minScale
+        }
+        else {
+            scale = newScale
+        }
+        
+        prevScale = scale
+    }
+    
+    open func animateOutsideHardBounds(to newValue: CGFloat, by difference: CGFloat, with duration: CGFloat) {
+        if value > minValue && value < maxValue
                 && !isInfinite {
-            withAnimation(.easeOut(duration: duration)) {
-                move(byValue: difference)
-                editingValueEnded()
-            }
-            withAnimation(.spring()) {
+            withAnimation(.spring(response: 0.55, dampingFraction: 0.75, blendDuration: 0.0)) {
                 value = newValue > maxValue ? maxValue : minValue
                 prevValue = newValue > maxValue ? maxValue : minValue
             }
@@ -161,9 +166,54 @@ open class PreciseSliderViewModel: ObservableObject {
         }
     }
     
+    func animateOutsideSoftBounds(to newValue: CGFloat, with duration: CGFloat) {
+        var destValue = newValue
+        
+        if newValue > maxValue {
+            destValue = (newValue - minValue).truncatingRemainder(dividingBy: (maxValue - minValue)) + minValue
+            value = destValue - (maxValue - minValue) //value - (newValue - minValue) - destValue
+            prevValue = value
+        }
+        else {
+            destValue = (newValue - minValue).truncatingRemainder(dividingBy: (maxValue - minValue)) + maxValue
+            value = destValue + (maxValue - minValue) //value - (newValue - minValue) - destValue
+            prevValue = value
+        }
+
+        withAnimation(.easeOut(duration: duration)) {
+            value = destValue
+            prevValue = destValue
+        }
+    }
+    
+    open func animateMomentum(byValue difference: CGFloat, duration: CGFloat) {
+        let newValue = value - (difference / scale)
+        
+        withAnimation(.linear(duration: 0)) {
+            value = value
+            prevValue = value
+        }
+        
+        if value > minValue && value < maxValue &&
+            newValue > minValue && newValue < maxValue {
+            withAnimation(.easeOut(duration: duration)) {
+                value = newValue
+                prevValue = newValue
+            }
+        }
+        else {
+            if isInfinite {
+                animateOutsideSoftBounds(to: newValue, with: duration)
+            }
+            else {
+                animateOutsideHardBounds(to: newValue, by: difference, with: duration)
+            }
+        }
+    }
+    
     //
     
-    public func editingValueEnded() {
+    open func editingValueEnded() {
         prevValue = value
         isEditing = false
     }
