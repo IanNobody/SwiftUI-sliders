@@ -16,7 +16,7 @@ public struct PreciseSliderView<ValueLabel: View>: View {
         self.valueLabel = valueLabel
     }
     
-    // TODO: Rozdělit rozhraní pro UIKit a SwiftUI elegantnějším způsobem
+    // TODO: Opravit podivně se chovající animaci na "hranicích" nekonečného varianty
     // TODO: Vyřešit chyby vzniklé nedokončenými gesty (nevyvolání události .onEnded)
     public var body: some View {
         GeometryReader { geometry in

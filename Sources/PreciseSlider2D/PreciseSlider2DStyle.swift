@@ -1,5 +1,5 @@
 //
-//  File.swift
+//  PreciseSlider2DStyle.swift
 //  
 //
 //  Created by Šimon Strýček on 26.03.2022.

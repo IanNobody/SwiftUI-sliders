@@ -7,15 +7,16 @@
 
 import SwiftUI
 
-struct PreciseSlider2D<Content:View>: View {
+struct PreciseSlider2DView<Content: View, AxisXLabel: View, AxisYLabel: View>: View {
     @Environment(\.preciseSlider2DStyle) var style
     
     @ObservedObject var axisX: PreciseAxis2DViewModel
     @ObservedObject var axisY: PreciseAxis2DViewModel
     
     @ViewBuilder let content: (_ size: CGSize, _ scale: CGSize) -> Content
+    @ViewBuilder let axisXLabel: (_ value: Double, _ step: Double) -> AxisXLabel
+    @ViewBuilder let axisYLabel: (_ value: Double, _ step: Double) -> AxisYLabel
     
-    // TODO: Opravit orientaci os
     // TODO: Opravit "natahování" mimo hranici osy
     // TODO: Animace občas skáčou kam nemají
     // TODO: Vyřešit čekání na dokončení animace s deaktivací osy
@@ -46,7 +47,7 @@ struct PreciseSlider2D<Content:View>: View {
                 .gesture(
                     DragGesture()
                         .onChanged { gesture in
-                            axisX.move(byValue: -gesture.translation.width * gestureXCoefitient(fromFrameSize: geometry.size))
+                            axisX.move(byValue: gesture.translation.width * gestureXCoefitient(fromFrameSize: geometry.size))
                             axisY.move(byValue: gesture.translation.height * gestureYCoefitient(fromFrameSize: geometry.size))
                         }
                         .onEnded { gesture in
@@ -72,15 +73,7 @@ struct PreciseSlider2D<Content:View>: View {
                 
                 // Osa Y
                 ZStack {
-                    PreciseAxis2DView(maxValue: axisY.maxValue, minValue: axisY.minValue, value: axisY.value, truncScale: axisY.truncScale, isInfinite: axisY.isInfinite, isActive: axisY.active, minDesignValue: minYValue(fromFrameSize: geometry.size), maxDesignValue: maxYValue(fromFrameSize: geometry.size), numberOfUnits: axisY.numberOfUnits, scaleBase: axisY.scaleBase, valueLabel: { value in
-                            Text("\(Int(value))")
-                                .rotationEffect(.degrees(-90))
-                                .foregroundColor(.white)
-                                .font(
-                                    .system(size: 7, design: .rounded)
-                                )
-                        }
-                    )
+                    PreciseAxis2DView(maxValue: axisY.maxValue, minValue: axisY.minValue, value: axisY.value, truncScale: axisY.truncScale, isInfinite: axisY.isInfinite, isActive: axisY.active, minDesignValue: minYValue(fromFrameSize: geometry.size), maxDesignValue: maxYValue(fromFrameSize: geometry.size), numberOfUnits: axisY.numberOfUnits, scaleBase: axisY.scaleBase, valueLabel: axisYLabel)
                     .frame(
                         width: contentSize(fromFrameSize: geometry.size).height,
                         height: geometry.size.width - contentSize(fromFrameSize: geometry.size).width
@@ -97,7 +90,7 @@ struct PreciseSlider2D<Content:View>: View {
                             axisY.activeMove(byValue: gesture.translation.height * gestureYCoefitient(fromFrameSize: geometry.size))
                         }
                         .onEnded { gesture in
-                            axisY.animateMomentum(byValue: (gesture.predictedEndTranslation.height - gesture.translation.height) * gestureYCoefitient(fromFrameSize: geometry.size), duration: 0.5)
+                            axisY.animateMomentum(byValue: (gesture.translation.height - gesture.predictedEndTranslation.height) * gestureYCoefitient(fromFrameSize: geometry.size), duration: 0.5)
 
                             axisY.editingValueEnded()
                         }
@@ -118,24 +111,17 @@ struct PreciseSlider2D<Content:View>: View {
                 
                 // Osa X
                 ZStack {
-                    PreciseAxis2DView(maxValue: axisX.maxValue, minValue: axisX.minValue, value: axisX.value, truncScale: axisX.truncScale, isInfinite: axisX.isInfinite, isActive: axisX.active, minDesignValue: minXValue(fromFrameSize: geometry.size), maxDesignValue: maxXValue(fromFrameSize: geometry.size), numberOfUnits: axisX.numberOfUnits, scaleBase: axisX.scaleBase, valueLabel: { value in
-                            Text("\(Int(value))")
-                                .rotationEffect(.degrees(180))
-                                .foregroundColor(.white)
-                                .font(
-                                    .system(size: 7, design: .rounded)
-                                )
-                        }
-                    )
-                        .rotationEffect(.degrees(-180))
+                    PreciseAxis2DView(maxValue: axisX.minValue, minValue: axisX.maxValue, value: axisX.value, truncScale: axisX.truncScale, isInfinite: axisX.isInfinite, isActive: axisX.active, minDesignValue: minXValue(fromFrameSize: geometry.size), maxDesignValue: maxXValue(fromFrameSize: geometry.size), numberOfUnits: axisX.numberOfUnits, scaleBase: axisX.scaleBase, valueLabel: axisXLabel)
+                        .rotationEffect(.degrees(180))
+                        //.scaleEffect(CGSize(width: -1, height: 1))
                         .frame(width: contentSize(fromFrameSize: geometry.size).width, height: geometry.size.height - contentSize(fromFrameSize: geometry.size).height)
                         .gesture(
                             DragGesture()
                                 .onChanged { gesture in
-                                    axisX.activeMove(byValue: -gesture.translation.width * gestureXCoefitient(fromFrameSize: geometry.size))
+                                    axisX.activeMove(byValue: gesture.translation.width * gestureXCoefitient(fromFrameSize: geometry.size))
                                 }
                                 .onEnded { gesture in
-                                    axisX.animateMomentum(byValue: (gesture.translation.width - gesture.predictedEndTranslation.width) * gestureXCoefitient(fromFrameSize: geometry.size), duration: 0.5)
+                                    axisX.animateMomentum(byValue: ( gesture.predictedEndTranslation.width - gesture.translation.width) * gestureXCoefitient(fromFrameSize: geometry.size), duration: 0.5)
 
                                     axisX.editingValueEnded()
                                 }
@@ -170,12 +156,11 @@ struct PreciseSlider2D<Content:View>: View {
         }
     }
     
-    // TODO: Ošetřit dělení nulou
     private func xOffsetTranslation(fromFrameSize frame: CGSize) -> CGFloat {
         let valueRange = (axisX.maxValue - axisX.minValue)
         
         if valueRange > 0 {
-            return (axisX.value - axisX.minValue) * (maxXValue(fromFrameSize: frame) - minXValue(fromFrameSize: frame)) / valueRange + minXValue(fromFrameSize: frame)
+            return (axisX.maxValue - axisX.value) * (maxXValue(fromFrameSize: frame) - minXValue(fromFrameSize: frame)) / valueRange + minXValue(fromFrameSize: frame)
         }
         else {
             return 0
@@ -277,9 +262,9 @@ struct PreciseSlider2D<Content:View>: View {
     }
 }
 
-struct PreciseSlider2D_Previews: PreviewProvider {
+struct PreciseSlider2DView_Previews: PreviewProvider {
     static var previews: some View {
-        PreciseSlider2D(
+        PreciseSlider2DView(
             axisX: PreciseAxis2DViewModel(),
             axisY: PreciseAxis2DViewModel(),
             content: { size, _ in
@@ -296,6 +281,14 @@ struct PreciseSlider2D_Previews: PreviewProvider {
                         .foregroundColor(.red)
                         .frame(width: 20, height: 1)
                 }
+            },
+            axisXLabel: { value, _ in
+                Text("\(value)")
+                    .font(.system(size: 6))
+            },
+            axisYLabel: { value, _ in
+                Text("\(value)")
+                    .font(.system(size: 6))
             }
         )
         .frame(width: 300, height: 300, alignment: .center)

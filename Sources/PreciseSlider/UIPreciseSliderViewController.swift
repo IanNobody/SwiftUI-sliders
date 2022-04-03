@@ -1,5 +1,5 @@
 //
-//  File.swift
+//  UIPreciseSliderViewController.swift
 //  
 //
 //  Created by Šimon Strýček on 28.03.2022.
@@ -7,21 +7,19 @@
 
 #if !os(macOS)
 
+import UIKit
 import SwiftUI
 import Combine
 
-public class UIPreciseSliderViewController: UIViewController {
+open class UIPreciseSliderViewController: UIViewController {
     @ObservedObject private var viewModel: PreciseSliderViewModel = PreciseSliderViewModel()
     public var dataSource: PreciseSliderDataSource? {
         didSet {
+            createViewModel()
             loadSlider()
         }
     }
-    public var delegate: PreciseSliderDelegate? {
-        didSet {
-            applyDelegate()
-        }
-    }
+    public var delegate: PreciseSliderDelegate?
     
     public var value: Double {
         get {
@@ -80,16 +78,16 @@ public class UIPreciseSliderViewController: UIViewController {
     }
     
     private func applyDelegate() {
-        valuePublisher = viewModel.$value.sink { value in
-            self.delegate?.valueDidChange(value: value)
+        valuePublisher = viewModel.$value.sink { newValue in
+            self.delegate?.valueDidChange(value: newValue)
         }
         
-        scalePublisher = viewModel.$scale.sink { value in
-            self.delegate?.scaleDidChange(scale: value)
+        scalePublisher = viewModel.$scale.sink { newScale in
+            self.delegate?.scaleDidChange(scale: newScale)
         }
         
-        interactionPublisher = viewModel.$isEditing.removeDuplicates().sink { value in
-            if value {
+        interactionPublisher = viewModel.$isEditing.removeDuplicates().sink { isEditing in
+            if isEditing {
                 self.delegate?.didBeginEditing()
             }
             else {
@@ -102,8 +100,6 @@ public class UIPreciseSliderViewController: UIViewController {
         sliderViewController?.removeFromParent()
         sliderViewController?.view.removeFromSuperview()
         
-        createViewModel()
-        applyDelegate()
         initSlider()
 
         guard let sliderViewController = sliderViewController else {
@@ -125,6 +121,7 @@ public class UIPreciseSliderViewController: UIViewController {
     
     override public func viewDidLoad() {
         loadSlider()
+        applyDelegate()
     }
 }
 
