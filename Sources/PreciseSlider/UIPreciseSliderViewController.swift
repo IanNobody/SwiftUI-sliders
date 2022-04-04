@@ -78,7 +78,7 @@ open class UIPreciseSliderViewController: UIViewController {
     }
     
     private func applyDelegate() {
-        valuePublisher = viewModel.$value.sink { newValue in
+        valuePublisher = viewModel.valuePublisher.sink { newValue in
             self.delegate?.valueDidChange(value: newValue)
         }
         

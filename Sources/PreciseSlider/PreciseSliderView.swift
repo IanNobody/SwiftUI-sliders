@@ -16,12 +16,11 @@ public struct PreciseSliderView<ValueLabel: View>: View {
         self.valueLabel = valueLabel
     }
     
-    // TODO: Opravit podivně se chovající animaci na "hranicích" nekonečného varianty
     // TODO: Vyřešit chyby vzniklé nedokončenými gesty (nevyvolání události .onEnded)
     public var body: some View {
         GeometryReader { geometry in
             ZStack {
-                PreciseAxisView(maxValue: viewModel.maxValue, minValue: viewModel.minValue, value: viewModel.value, truncScale: viewModel.truncScale, isInfinite: viewModel.isInfinite, maxDesignValue: maxDesignValue(fromWidth: geometry.size.width), minDesignValue: minDesignValue(fromWidth: geometry.size.width), scaleBase: viewModel.scaleBase, numberOfUnits: viewModel.numberOfUnits, valueLabel: valueLabel)
+                PreciseAxisView(maxValue: viewModel.maxValue, minValue: viewModel.minValue, value: viewModel.unsafeValue, truncScale: viewModel.truncScale, isInfinite: viewModel.isInfinite, maxDesignValue: maxDesignValue(fromWidth: geometry.size.width), minDesignValue: minDesignValue(fromWidth: geometry.size.width), scaleBase: viewModel.scaleBase, numberOfUnits: viewModel.numberOfUnits, valueLabel: valueLabel)
             }
             // Výběr hodnoty
             // TODO: Ošetřit minimální délky gest a animací

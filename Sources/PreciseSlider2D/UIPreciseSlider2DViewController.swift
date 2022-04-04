@@ -108,7 +108,7 @@ public class UIPreciseSlider2DViewController: UIViewController {
     }
     
     private func applyAxisXDelegate() {
-        valueXPublisher = axisXViewModel.$value.sink { newValue in
+        valueXPublisher = axisXViewModel.valuePublisher.sink { newValue in
             self.axisXDelegate?.valueDidChange(value: newValue)
         }
         
@@ -127,7 +127,7 @@ public class UIPreciseSlider2DViewController: UIViewController {
     }
     
     private func applyAxisYDelegate() {
-        valueYPublisher = axisYViewModel.$value.sink { newValue in
+        valueYPublisher = axisYViewModel.valuePublisher.sink { newValue in
             self.axisYDelegate?.valueDidChange(value: newValue)
         }
         
