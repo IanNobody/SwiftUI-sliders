@@ -19,6 +19,7 @@ open class UIPreciseSliderViewController: UIViewController {
             loadSlider()
         }
     }
+    
     public var delegate: PreciseSliderDelegate?
     
     public var value: Double {

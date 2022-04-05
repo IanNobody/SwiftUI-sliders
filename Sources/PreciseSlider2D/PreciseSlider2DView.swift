@@ -19,7 +19,6 @@ struct PreciseSlider2DView<Content: View, AxisXLabel: View, AxisYLabel: View>: V
     
     // TODO: Opravit "natahování" mimo hranici osy
     // TODO: Vyřešit čekání na dokončení animace s deaktivací osy
-    // TODO: Synchronizace animací osy a obsahu
     var body: some View {
         GeometryReader { geometry in
             ZStack {
@@ -72,7 +71,11 @@ struct PreciseSlider2DView<Content: View, AxisXLabel: View, AxisYLabel: View>: V
                 
                 // Osa Y
                 ZStack {
-                    PreciseAxis2DView(maxValue: axisY.maxValue, minValue: axisY.minValue, value: axisY.unsafeValue, truncScale: axisY.truncScale, isInfinite: axisY.isInfinite, isActive: axisY.active, minDesignValue: minYValue(fromFrameSize: geometry.size), maxDesignValue: maxYValue(fromFrameSize: geometry.size), numberOfUnits: axisY.numberOfUnits, scaleBase: axisY.scaleBase, valueLabel: axisYLabel)
+                    PreciseAxis2DView(maxValue: axisY.maxValue, minValue: axisY.minValue, value: axisY.unsafeValue, truncScale: axisY.truncScale, isInfinite: axisY.isInfinite, isActive: axisY.active, minDesignValue: minYValue(fromFrameSize: geometry.size), maxDesignValue: maxYValue(fromFrameSize: geometry.size), numberOfUnits: axisY.numberOfUnits, scaleBase: axisY.scaleBase, valueLabel: { value, step in
+                            axisYLabel(value, step)
+                                .rotationEffect(.degrees(180))
+                        }
+                    )
                     .frame(
                         width: contentSize(fromFrameSize: geometry.size).height,
                         height: geometry.size.width - contentSize(fromFrameSize: geometry.size).width
@@ -89,7 +92,7 @@ struct PreciseSlider2DView<Content: View, AxisXLabel: View, AxisYLabel: View>: V
                             axisY.activeMove(byValue: gesture.translation.height * gestureYCoefitient(fromFrameSize: geometry.size))
                         }
                         .onEnded { gesture in
-                            axisY.animateMomentum(byValue: (gesture.translation.height - gesture.predictedEndTranslation.height) * gestureYCoefitient(fromFrameSize: geometry.size), duration: 0.5)
+                            axisY.animateMomentum(byValue: (gesture.predictedEndTranslation.height - gesture.translation.height) * gestureYCoefitient(fromFrameSize: geometry.size), duration: 0.5)
 
                             axisY.editingValueEnded()
                         }
@@ -110,7 +113,10 @@ struct PreciseSlider2DView<Content: View, AxisXLabel: View, AxisYLabel: View>: V
                 
                 // Osa X
                 ZStack {
-                    PreciseAxis2DView(maxValue: axisX.minValue, minValue: axisX.maxValue, value: axisX.unsafeValue, truncScale: axisX.truncScale, isInfinite: axisX.isInfinite, isActive: axisX.active, minDesignValue: minXValue(fromFrameSize: geometry.size), maxDesignValue: maxXValue(fromFrameSize: geometry.size), numberOfUnits: axisX.numberOfUnits, scaleBase: axisX.scaleBase, valueLabel: axisXLabel)
+                    PreciseAxis2DView(maxValue: axisX.minValue, minValue: axisX.maxValue, value: axisX.unsafeValue, truncScale: axisX.truncScale, isInfinite: axisX.isInfinite, isActive: axisX.active, minDesignValue: minXValue(fromFrameSize: geometry.size), maxDesignValue: maxXValue(fromFrameSize: geometry.size), numberOfUnits: axisX.numberOfUnits, scaleBase: axisX.scaleBase, valueLabel: { value, step in
+                            axisXLabel(value, step)
+                                .rotationEffect(.degrees(180))
+                        })
                         .rotationEffect(.degrees(180))
                         .frame(width: contentSize(fromFrameSize: geometry.size).width, height: geometry.size.height - contentSize(fromFrameSize: geometry.size).height)
                         .gesture(
