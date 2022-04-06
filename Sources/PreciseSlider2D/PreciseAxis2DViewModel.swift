@@ -11,8 +11,11 @@ import PreciseSlider
 
 public class PreciseAxis2DViewModel: PreciseSliderViewModel {
     @Published var active: Bool = false
+    var activationTimer: DispatchSourceTimer?
     
     func activeMove(byValue difference: CGFloat) {
+        cancelDeactivationAnimation()
+        
         withAnimation(.easeInOut) {
             active = true
         }
@@ -20,13 +23,26 @@ public class PreciseAxis2DViewModel: PreciseSliderViewModel {
         super.move(byValue: difference)
     }
     
-    override public func animateMomentum(byValue difference: CGFloat, duration: CGFloat) {
-        if active {
-            withAnimation(.easeInOut.delay(2)) {
-                active = false
-            }
+    override public func animateMomentum(byValue difference: CGFloat, translationCoefitient coefitient: Double, duration: CGFloat) {
+        let timer = DispatchSource.makeTimerSource(queue: .main)
+        timer.schedule(deadline: .now() + 2)
+        timer.setEventHandler {
+            self.deactivateAxis()
         }
+        timer.resume()
+        activationTimer = timer
         
-        super.animateMomentum(byValue: difference, duration: duration)
+        super.animateMomentum(byValue: difference, translationCoefitient: coefitient, duration: duration)
+    }
+    
+    private func cancelDeactivationAnimation() {
+        activationTimer?.cancel()
+        activationTimer = nil
+    }
+    
+    private func deactivateAxis() {
+        withAnimation(.easeInOut) {
+            active = false
+        }
     }
 }
