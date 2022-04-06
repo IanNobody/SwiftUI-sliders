@@ -17,21 +17,21 @@ public class UIPreciseSlider2DViewController: UIViewController {
     
     public var axisXDataSource: PreciseAxis2DDataSource? {
         didSet {
-            initAxisXViewModel()
-            loadSlider()
+            createAxisXViewModel()
+            updateSlider()
         }
     }
     
     public var axisYDataSource: PreciseAxis2DDataSource? {
         didSet {
-            initAxisYViewModel()
-            loadSlider()
+            createAxisYViewModel()
+            updateSlider()
         }
     }
     
     public var dataSource: PreciseSlider2DDataSource? {
         didSet {
-            loadSlider()
+            updateSlider()
         }
     }
     
@@ -74,6 +74,10 @@ public class UIPreciseSlider2DViewController: UIViewController {
         }
     }
     
+    public var isEditingValue: Bool {
+        axisXViewModel.isEditing || axisYViewModel.isEditing
+    }
+    
     private var valueXPublisher: AnyCancellable?
     private var scaleXPublisher: AnyCancellable?
     private var interactionXPublisher: AnyCancellable?
@@ -82,30 +86,7 @@ public class UIPreciseSlider2DViewController: UIViewController {
     private var scaleYPublisher: AnyCancellable?
     private var interactionYPublisher: AnyCancellable?
     
-    private var sliderViewController: UIHostingController<PreciseSlider2DView<PreciseSlider2DContent, Text, Text>>?
-    
-    private func initSlider() {
-        sliderViewController = UIHostingController(
-            rootView:
-                PreciseSlider2DView(
-                    axisX: axisXViewModel,
-                    axisY: axisYViewModel,
-                    content: { size, scale in
-                        PreciseSlider2DContent(image: self.dataSource?.contentImage(ofSize: size, withScale: scale), frameSize: size)
-                    },
-                    axisXLabel: { value, step in
-                        Text(self.axisXDataSource?.unitLabelText(for: value, with: step) ?? "")
-                            .foregroundColor(Color(self.axisXDataSource?.unitLabelColor(for: value, with: step) ?? .white))
-                            .font(Font((self.axisXDataSource?.unitLabelFont(for: value, with: step) ?? UIFont.systemFont(ofSize: 6)) as CTFont))
-                    },
-                    axisYLabel: { value, step in
-                        Text(self.axisYDataSource?.unitLabelText(for: value, with: step) ?? "")
-                            .foregroundColor(Color(self.axisYDataSource?.unitLabelColor(for: value, with: step) ?? .white))
-                            .font(Font((self.axisYDataSource?.unitLabelFont(for: value, with: step) ?? UIFont.systemFont(ofSize: 6)) as CTFont))
-                    }
-                )
-        )
-    }
+    public var preciseSlider2DView = UIPreciseSlider2D()
     
     private func applyAxisXDelegate() {
         valueXPublisher = axisXViewModel.valuePublisher.sink { newValue in
@@ -145,7 +126,7 @@ public class UIPreciseSlider2DViewController: UIViewController {
         }
     }
 
-    private func initAxisXViewModel() {
+    private func createAxisXViewModel() {
         if let axisXDataSource = axisXDataSource {
             axisXViewModel = PreciseAxis2DViewModel(
                 defaultValue: axisXDataSource.defaultValue,
@@ -163,7 +144,7 @@ public class UIPreciseSlider2DViewController: UIViewController {
         }
     }
     
-    private func initAxisYViewModel() {
+    private func createAxisYViewModel() {
         if let axisYDataSource = axisYDataSource {
             axisYViewModel = PreciseAxis2DViewModel(
                 defaultValue: axisYDataSource.defaultValue,
@@ -181,33 +162,21 @@ public class UIPreciseSlider2DViewController: UIViewController {
         }
     }
     
-    private func loadSlider() {
-        sliderViewController?.removeFromParent()
-        sliderViewController?.view.removeFromSuperview()
-        
-        initSlider()
-
-        guard let sliderViewController = sliderViewController else {
-            return
-        }
-        
-        addChild(sliderViewController)
-        sliderViewController.view.translatesAutoresizingMaskIntoConstraints = false
-        view.addSubview(sliderViewController.view)
-        sliderViewController.didMove(toParent: self)
-        
-        NSLayoutConstraint.activate([
-            sliderViewController.view.widthAnchor.constraint(equalTo: view.widthAnchor),
-            sliderViewController.view.heightAnchor.constraint(equalTo: view.heightAnchor),
-            sliderViewController.view.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-            sliderViewController.view.centerYAnchor.constraint(equalTo: view.centerYAnchor)
-        ])
+    private func updateSlider() {
+        preciseSlider2DView.updateView(
+            axisXViewModel: axisXViewModel,
+            axisYViewModel: axisYViewModel,
+            axisXDataSource: axisXDataSource,
+            axisYDataSource: axisYDataSource,
+            dataSource: dataSource
+        )
     }
     
-    override public func viewDidLoad() {
+    override public func loadView() {
         applyAxisXDelegate()
         applyAxisYDelegate()
-        loadSlider()
+        updateSlider()
+        view = preciseSlider2DView
     }
     
     struct PreciseSlider2DContent: View {

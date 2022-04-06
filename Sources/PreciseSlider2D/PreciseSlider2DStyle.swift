@@ -8,13 +8,13 @@
 import SwiftUI
 
 public class PreciseSlider2DStyle {
-    public let axisBackgroundColor: Color
-    public let axisPointerColor: Color
-    public let defaultUnitColor: Color
-    public let highlightedUnitColor: Color
-    public let background: PreciseSlider2DBackground
-    public let pointerColor: PreciseSlider2DPointerColor
-    public let pointerSize: CGSize
+    public var axisBackgroundColor: Color
+    public var axisPointerColor: Color
+    public var defaultUnitColor: Color
+    public var highlightedUnitColor: Color
+    public var background: PreciseSlider2DBackground
+    public var pointerColor: PreciseSlider2DPointerColor
+    public var pointerSize: CGSize
     
     init(axisBackgroundColor: Color = .black, axisPointerColor: Color = .blue, defaultUnitColor: Color = .white, highlightedColor: Color, background: PreciseSlider2DBackground = .blurredContent, pointerColor: PreciseSlider2DPointerColor = .invertedColor, pointerSize: CGSize = CGSize(width: 20, height: 20)) {
         self.axisBackgroundColor = axisBackgroundColor
@@ -39,11 +39,65 @@ public class PreciseSlider2DStyle {
     public enum PreciseSlider2DBackground: Equatable {
         case blurredContent
         case color(Color)
+        
+        init(uiSliderBackground background: UIPreciseSlider2DBackground) {
+            switch background {
+            case .color(let color):
+                self = .color(Color(uiColor: color))
+                break
+            case .blurredContent:
+                self = .blurredContent
+                break
+            }
+        }
+    }
+    
+    public enum UIPreciseSlider2DBackground: Equatable {
+        case blurredContent
+        case color(UIColor)
+        
+        init(sliderBackground background: PreciseSlider2DBackground) {
+            switch background {
+            case .color(let color):
+                self = .color(UIColor(color))
+                break
+            case .blurredContent:
+                self = .blurredContent
+                break
+            }
+        }
     }
     
     public enum PreciseSlider2DPointerColor: Equatable {
         case invertedColor
         case staticColor(Color)
+        
+        init(uiPointerColor color: UIPreciseSlider2DPointerColor) {
+            switch color {
+            case .staticColor(let color):
+                self = .staticColor(Color(uiColor: color))
+                break
+            case .invertedColor:
+                self = .invertedColor
+                break
+            }
+        }
+    }
+    
+    public enum UIPreciseSlider2DPointerColor: Equatable {
+        case invertedColor
+        case staticColor(UIColor)
+        
+        init(pointerColor color: PreciseSlider2DPointerColor) {
+            switch color {
+            case .staticColor(let color):
+                self = .staticColor(UIColor(color))
+                break
+            case .invertedColor:
+                self = .invertedColor
+                break
+            }
+        }
     }
 }
 

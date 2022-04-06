@@ -19,7 +19,7 @@ struct PreciseUnitView<UnitLabel: View>: View {
                     .frame(width: 1)
                     .foregroundColor(
                         isHighlited ?
-                            style.highlitedUnitColor : style.defaultUnitColor
+                            style.highlightedUnitColor : style.defaultUnitColor
                     )
                 if isHighlited {
                     unitLabel()

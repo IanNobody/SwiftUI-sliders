@@ -33,20 +33,20 @@ public class UIPreciseSlider: UIView {
             style.defaultUnitColor = Color(uiColor: newValue)
             
             if !hasHighlitedUnitDifferentColor {
-                style.highlitedUnitColor = style.defaultUnitColor
+                style.highlightedUnitColor = style.defaultUnitColor
             }
         }
     }
     
     public var hasHighlitedUnitDifferentColor: Bool = false
     
-    public var highlitedUnitColor: UIColor {
+    public var highlightedUnitColor: UIColor {
         get {
-            UIColor(style.highlitedUnitColor)
+            UIColor(style.highlightedUnitColor)
         }
         set {
             if hasHighlitedUnitDifferentColor {
-                style.highlitedUnitColor = Color(uiColor: newValue)
+                style.highlightedUnitColor = Color(uiColor: newValue)
             }
         }
     }

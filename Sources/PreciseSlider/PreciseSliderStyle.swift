@@ -10,13 +10,13 @@ import SwiftUI
 public class PreciseSliderStyle {
     public var backgroundColor: Color
     public var defaultUnitColor: Color
-    public var highlitedUnitColor: Color
+    public var highlightedUnitColor: Color
     public var axisPointerColor: Color
     
     public init(backgroundColor: Color = .black, defaultUnitColor: Color = .white, highlitedUnitColor: Color, axisPointerColor: Color = .blue) {
         self.backgroundColor = backgroundColor
         self.defaultUnitColor = defaultUnitColor
-        self.highlitedUnitColor = highlitedUnitColor
+        self.highlightedUnitColor = highlitedUnitColor
         self.axisPointerColor = axisPointerColor
     }
     
@@ -24,7 +24,7 @@ public class PreciseSliderStyle {
     public init(backgroundColor: Color = .black, defaultUnitColor: Color = .white, axisPointerColor: Color = .blue) {
         self.backgroundColor = backgroundColor
         self.defaultUnitColor = defaultUnitColor
-        self.highlitedUnitColor = defaultUnitColor
+        self.highlightedUnitColor = defaultUnitColor
         self.axisPointerColor = axisPointerColor
     }
 }
