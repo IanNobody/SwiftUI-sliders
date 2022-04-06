@@ -23,21 +23,20 @@ public struct PreciseSliderView<ValueLabel: View>: View {
                 PreciseAxisView(maxValue: viewModel.maxValue, minValue: viewModel.minValue, value: viewModel.unsafeValue, truncScale: viewModel.truncScale, isInfinite: viewModel.isInfinite, maxDesignValue: maxDesignValue(fromWidth: geometry.size.width), minDesignValue: minDesignValue(fromWidth: geometry.size.width), scaleBase: viewModel.scaleBase, numberOfUnits: viewModel.numberOfUnits, valueLabel: valueLabel)
             }
             // Výběr hodnoty
-            // TODO: Ošetřit minimální délky gest a animací
             .gesture(
                 DragGesture(minimumDistance: 0)
                     .onChanged { gesture in
                         viewModel.move(byValue: gesture.translation.width * gestureCoefitient(fromWidth: geometry.size.width))
                     }
                     .onEnded { gesture in
-                        viewModel.animateMomentum(byValue: (gesture.predictedEndTranslation.width - gesture.translation.width) * gestureCoefitient(fromWidth: geometry.size.width), duration: 0.5)
+                        viewModel.animateMomentum(byValue: (gesture.predictedEndTranslation.width - gesture.translation.width), translationCoefitient: gestureCoefitient(fromWidth: geometry.size.width), duration: 0.5)
 
                         viewModel.editingValueEnded()
                     }
             )
             // Výběr měřítka
             .gesture(
-                MagnificationGesture()
+                MagnificationGesture(minimumScaleDelta: 0)
                     .onChanged { gesture in
                         viewModel.zoom(byScale: gesture.magnitude)
                     }
@@ -45,7 +44,6 @@ public struct PreciseSliderView<ValueLabel: View>: View {
                         viewModel.editingScaleEnded()
                     }
             )
-            // TODO: Zastavení animace jinými gesty
         }
     }
     

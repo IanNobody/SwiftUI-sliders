@@ -37,7 +37,7 @@ struct PreciseSliderContentView<Content: View>: View, Animatable {
                                 content(geometry.size, scale)
                                     .frame(
                                         width: geometry.size.width,
-                                        height: geometry.size.width
+                                        height: geometry.size.height
                                     )
                                     .clipShape(Rectangle())
                             }
@@ -46,7 +46,7 @@ struct PreciseSliderContentView<Content: View>: View, Animatable {
                 }
                 .frame(
                     width: geometry.size.width,
-                    height: geometry.size.width
+                    height: geometry.size.height
                 )
                 .offset(
                     x: truncOffset(to: geometry.size).width,
@@ -66,7 +66,7 @@ struct PreciseSliderContentView<Content: View>: View, Animatable {
                                             content(geometry.size, scale)
                                                 .frame(
                                                     width: geometry.size.width,
-                                                    height: geometry.size.width
+                                                    height: geometry.size.height
                                                 )
                                                 .clipShape(Rectangle())
                                         }
@@ -75,7 +75,7 @@ struct PreciseSliderContentView<Content: View>: View, Animatable {
                             }
                             .frame(
                                 width: geometry.size.width,
-                                height: geometry.size.width
+                                height: geometry.size.height
                             )
                             .offset(
                                 x: truncOffset(to: geometry.size).width,
@@ -95,7 +95,7 @@ struct PreciseSliderContentView<Content: View>: View, Animatable {
                                             content(geometry.size, scale)
                                                 .frame(
                                                     width: geometry.size.width,
-                                                    height: geometry.size.width
+                                                    height: geometry.size.height
                                                 )
                                                 .clipShape(Rectangle())
                                         }
@@ -104,7 +104,7 @@ struct PreciseSliderContentView<Content: View>: View, Animatable {
                             }
                             .frame(
                                 width: geometry.size.width,
-                                height: geometry.size.width
+                                height: geometry.size.height
                             )
                             .offset(
                                 x: truncOffset(to: geometry.size).width,
@@ -139,7 +139,7 @@ struct PreciseSliderContentView<Content: View>: View, Animatable {
                                             content(geometry.size, scale)
                                                 .frame(
                                                     width: geometry.size.width,
-                                                    height: geometry.size.width
+                                                    height: geometry.size.height
                                                 )
                                                 .clipShape(Rectangle())
                                         }
@@ -148,7 +148,7 @@ struct PreciseSliderContentView<Content: View>: View, Animatable {
                             }
                             .frame(
                                 width: geometry.size.width,
-                                height: geometry.size.width
+                                height: geometry.size.height
                             )
                             .offset(
                                 x: truncOffset(to: geometry.size).width * 0.5,

@@ -44,6 +44,9 @@ struct PreciseAxis2DView<ValueLabel:View>: View, Animatable {
     
     var body: some View {
         GeometryReader { geometry in
+            Rectangle()
+                .foregroundColor(.clear)
+                .contentShape(Rectangle())
             ZStack {
                 Rectangle()
                     .frame(
@@ -243,10 +246,10 @@ struct PreciseAxis2DView<ValueLabel:View>: View, Animatable {
     
     private func axisHeight(fromFrameHeight frame: CGFloat) -> CGFloat {
         if active {
-            return frame * 2
+            return frame
         }
         else {
-            return frame
+            return frame / 2
         }
     }
     
@@ -271,7 +274,7 @@ struct PreciseAxis2DView<ValueLabel:View>: View, Animatable {
 
 struct PreciseAxis2DView_Previews: PreviewProvider {
     static var previews: some View {
-        PreciseAxis2DView(maxValue: 1000, minValue: -1000, value: 900.0, truncScale: 1.2, isInfinite: false, isActive: true, minDesignValue: -350, maxDesignValue: 350, numberOfUnits: 20, scaleBase: 1.0, valueLabel: { value, step in
+        PreciseAxis2DView(maxValue: 1000, minValue: -1000, value: 900.0, truncScale: 1.2, isInfinite: false, isActive: false, minDesignValue: -350, maxDesignValue: 350, numberOfUnits: 20, scaleBase: 1.0, valueLabel: { value, step in
                 Text("\(Int(value))")
                 .foregroundColor(.white)
                 .font(

@@ -40,7 +40,6 @@ struct PreciseAxisView<UnitLabel: View>: View, Animatable {
         self.valueLabel = valueLabel
     }
     
-    // TODO: Opravit animace u nekonečné varianty
     var body: some View {
         GeometryReader { geometry in
             ZStack {

@@ -109,11 +109,12 @@ open class PreciseSliderViewModel: ObservableObject {
         
         if (newValue > correctMaxValue || newValue < correctMinValue) {
             if !isInfinite {
-                let difference = newValue - (newValue > correctMaxValue ? correctMaxValue : correctMinValue)
+                let unscaledNewValue = prevValue - difference
+                let difference = unscaledNewValue - (unscaledNewValue > correctMaxValue ? correctMaxValue : correctMinValue)
             
                 newValue = newValue > correctMaxValue ?
-                    correctMaxValue + pow(abs(difference), 1/2) :
-                    correctMinValue - pow(abs(difference), 1/2)
+                    correctMaxValue + ((pow(abs(difference) + 1/4, 1/2) - 1/2) / scale) :
+                    correctMinValue - ((pow(abs(difference) + 1/4, 1/2) - 1/2) / scale)
             }
             else {
                 if newValue > correctMaxValue {
@@ -197,8 +198,12 @@ open class PreciseSliderViewModel: ObservableObject {
         }
     }
     
-    open func animateMomentum(byValue difference: CGFloat, duration: CGFloat) {
-        let newValue = unsafeValue - (difference / scale)
+    open func animateMomentum(byValue difference: CGFloat, translationCoefitient coefitient: Double, duration: CGFloat) {
+        let newValue = unsafeValue - ((difference * coefitient) / scale)
+        
+        if difference <= 9 && newValue > correctMinValue && newValue < correctMaxValue {
+            return
+        }
         
         withAnimation(.linear(duration: 0)) {
             unsafeValue = unsafeValue
@@ -217,7 +222,7 @@ open class PreciseSliderViewModel: ObservableObject {
                 animateOutsideSoftBounds(to: newValue, with: duration)
             }
             else {
-                animateOutsideHardBounds(to: newValue, by: difference, with: duration)
+                animateOutsideHardBounds(to: newValue, by: (difference * coefitient), with: duration)
             }
         }
     }

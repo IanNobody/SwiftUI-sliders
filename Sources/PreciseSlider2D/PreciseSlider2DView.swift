@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-struct PreciseSlider2DView<Content: View, AxisXLabel: View, AxisYLabel: View>: View {
+public struct PreciseSlider2DView<Content: View, AxisXLabel: View, AxisYLabel: View>: View {
     @Environment(\.preciseSlider2DStyle) var style
     
     @ObservedObject var axisX: PreciseAxis2DViewModel
@@ -17,9 +17,15 @@ struct PreciseSlider2DView<Content: View, AxisXLabel: View, AxisYLabel: View>: V
     @ViewBuilder let axisXLabel: (_ value: Double, _ step: Double) -> AxisXLabel
     @ViewBuilder let axisYLabel: (_ value: Double, _ step: Double) -> AxisYLabel
     
-    // TODO: Opravit "natahování" mimo hranici osy
-    // TODO: Vyřešit čekání na dokončení animace s deaktivací osy
-    var body: some View {
+    public init(axisX: PreciseAxis2DViewModel, axisY: PreciseAxis2DViewModel, content: @escaping (_ size: CGSize, _ scale: CGSize) -> Content, axisXLabel: @escaping (_ value: Double, _ step: Double) -> AxisXLabel, axisYLabel: @escaping (_ value: Double, _ step: Double) -> AxisYLabel) {
+        self.axisX = axisX
+        self.axisY = axisY
+        self.content = content
+        self.axisXLabel = axisXLabel
+        self.axisYLabel = axisYLabel
+    }
+    
+    public var body: some View {
         GeometryReader { geometry in
             ZStack {
                 PreciseSliderContentView(
@@ -43,22 +49,22 @@ struct PreciseSlider2DView<Content: View, AxisXLabel: View, AxisYLabel: View>: V
                     y: contentOffset(fromFrameSize: geometry.size).height
                 )
                 .gesture(
-                    DragGesture()
+                    DragGesture(minimumDistance: 0)
                         .onChanged { gesture in
                             axisX.move(byValue: gesture.translation.width * gestureXCoefitient(fromFrameSize: geometry.size))
                             axisY.move(byValue: gesture.translation.height * gestureYCoefitient(fromFrameSize: geometry.size))
                         }
                         .onEnded { gesture in
-                            axisX.animateMomentum(byValue: (gesture.predictedEndTranslation.width - gesture.translation.width) * gestureXCoefitient(fromFrameSize: geometry.size), duration: 1)
+                            axisX.animateMomentum(byValue: (gesture.predictedEndTranslation.width - gesture.translation.width), translationCoefitient: gestureXCoefitient(fromFrameSize: geometry.size), duration: 1)
                             
-                            axisY.animateMomentum(byValue: (gesture.predictedEndTranslation.height - gesture.translation.height) * gestureYCoefitient(fromFrameSize: geometry.size), duration: 1)
+                            axisY.animateMomentum(byValue: (gesture.predictedEndTranslation.height - gesture.translation.height), translationCoefitient: gestureYCoefitient(fromFrameSize: geometry.size), duration: 1)
                             
                             axisX.editingValueEnded()
                             axisY.editingValueEnded()
                         }
                 )
                 .gesture(
-                    MagnificationGesture()
+                    MagnificationGesture(minimumScaleDelta: 0)
                         .onChanged { gesture in
                             axisX.zoom(byScale: gesture.magnitude)
                             axisY.zoom(byScale: gesture.magnitude)
@@ -78,27 +84,27 @@ struct PreciseSlider2DView<Content: View, AxisXLabel: View, AxisYLabel: View>: V
                     )
                     .frame(
                         width: contentSize(fromFrameSize: geometry.size).height,
-                        height: geometry.size.width - contentSize(fromFrameSize: geometry.size).width
+                        height: axisHeight(fromFrameSize: geometry.size) * 2
                         )
                     .rotationEffect(.degrees(90))
                 }
                 .frame(
-                    width: geometry.size.width - contentSize(fromFrameSize: geometry.size).width,
+                    width: (geometry.size.width - contentSize(fromFrameSize: geometry.size).width) * 2,
                     height: contentSize(fromFrameSize: geometry.size).height
                 )
                 .gesture(
-                    DragGesture()
+                    DragGesture(minimumDistance: 0)
                         .onChanged { gesture in
                             axisY.activeMove(byValue: gesture.translation.height * gestureYCoefitient(fromFrameSize: geometry.size))
                         }
                         .onEnded { gesture in
-                            axisY.animateMomentum(byValue: (gesture.predictedEndTranslation.height - gesture.translation.height) * gestureYCoefitient(fromFrameSize: geometry.size), duration: 0.5)
+                            axisY.animateMomentum(byValue: (gesture.predictedEndTranslation.height - gesture.translation.height), translationCoefitient: gestureYCoefitient(fromFrameSize: geometry.size), duration: 0.5)
 
                             axisY.editingValueEnded()
                         }
                 )
                 .gesture(
-                    MagnificationGesture()
+                    MagnificationGesture(minimumScaleDelta: 0)
                         .onChanged { gesture in
                             axisY.zoom(byScale: gesture.magnitude)
                         }
@@ -107,7 +113,7 @@ struct PreciseSlider2DView<Content: View, AxisXLabel: View, AxisYLabel: View>: V
                         }
                 )
                 .offset(
-                    x: contentSize(fromFrameSize: geometry.size).width / 2,
+                    x: (contentSize(fromFrameSize: geometry.size).width - axisHeight(fromFrameSize: geometry.size)) / 2 ,
                     y: (contentSize(fromFrameSize: geometry.size).height - geometry.size.height) / 2
                 )
                 
@@ -118,14 +124,14 @@ struct PreciseSlider2DView<Content: View, AxisXLabel: View, AxisYLabel: View>: V
                                 .rotationEffect(.degrees(180))
                         })
                         .rotationEffect(.degrees(180))
-                        .frame(width: contentSize(fromFrameSize: geometry.size).width, height: geometry.size.height - contentSize(fromFrameSize: geometry.size).height)
+                        .frame(width: contentSize(fromFrameSize: geometry.size).width, height: axisHeight(fromFrameSize: geometry.size) * 2)
                         .gesture(
                             DragGesture()
                                 .onChanged { gesture in
                                     axisX.activeMove(byValue: gesture.translation.width * gestureXCoefitient(fromFrameSize: geometry.size))
                                 }
                                 .onEnded { gesture in
-                                    axisX.animateMomentum(byValue: ( gesture.predictedEndTranslation.width - gesture.translation.width) * gestureXCoefitient(fromFrameSize: geometry.size), duration: 0.5)
+                                    axisX.animateMomentum(byValue: ( gesture.predictedEndTranslation.width - gesture.translation.width), translationCoefitient: gestureXCoefitient(fromFrameSize: geometry.size), duration: 0.5)
 
                                     axisX.editingValueEnded()
                                 }
