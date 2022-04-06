@@ -41,6 +41,13 @@ public class VideoPlayer: UIViewController, PreciseSliderDelegate {
         sliderViewController.dataSource = videoPlayer
         sliderViewController.delegate = self
         
+        sliderViewController.preciseSliderView.axisBackgroundColor =
+            UITraitCollection.current.userInterfaceStyle == .dark ?
+            .black : .white
+        sliderViewController.preciseSliderView.defaultUnitColor =
+            UITraitCollection.current.userInterfaceStyle == .dark ?
+            .white : .black
+        
         view.addSubview(videoPlayer)
         view.addSubview(sliderViewController.view)
         addChild(sliderViewController)
@@ -58,7 +65,7 @@ public class VideoPlayer: UIViewController, PreciseSliderDelegate {
         else {
             return
         }
-
+        
         NSLayoutConstraint.activate([
             videoPlayer.leftAnchor.constraint(equalTo: view.leftAnchor),
             videoPlayer.rightAnchor.constraint(equalTo: view.rightAnchor),

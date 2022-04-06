@@ -107,7 +107,8 @@ class VideoView: UIView, PreciseSliderDataSource {
     }
     
     public func unitLabelColor(for value: Double, with stepSize: Double) -> UIColor {
-        .white
+        UITraitCollection.current.userInterfaceStyle == .dark ?
+            .white : .black
     }
     
     var maxValue: Double {
