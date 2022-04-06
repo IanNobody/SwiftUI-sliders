@@ -15,8 +15,7 @@ open class UIPreciseSliderViewController: UIViewController {
     @ObservedObject private var viewModel: PreciseSliderViewModel = PreciseSliderViewModel()
     public var dataSource: PreciseSliderDataSource? {
         didSet {
-            createViewModel()
-            loadSlider()
+            updateSlider()
         }
     }
     
@@ -47,18 +46,7 @@ open class UIPreciseSliderViewController: UIViewController {
     private var valuePublisher: AnyCancellable?
     private var scalePublisher: AnyCancellable?
     private var interactionPublisher: AnyCancellable?
-    private var sliderViewController: UIHostingController<PreciseSliderView<Text>>?
-    
-    private func initSlider() {
-        sliderViewController = UIHostingController(
-            rootView:
-                PreciseSliderView(viewModel: viewModel) { value, step in
-                    Text(self.dataSource?.unitLabelText(for: value, with: step) ?? "")
-                        .foregroundColor(Color(self.dataSource?.unitLabelColor(for: value, with: step) ?? .white))
-                        .font(Font((self.dataSource?.unitLabelFont(for: value, with: step) ?? UIFont.systemFont(ofSize: 6)) as CTFont))
-                }
-        )
-    }
+    public let preciseSliderView = UIPreciseSlider()
     
     private func createViewModel() {
         if let dataSource = dataSource {
@@ -76,6 +64,8 @@ open class UIPreciseSliderViewController: UIViewController {
         else {
             viewModel = PreciseSliderViewModel()
         }
+        
+        applyDelegate()
     }
     
     private func applyDelegate() {
@@ -97,32 +87,15 @@ open class UIPreciseSliderViewController: UIViewController {
         }
     }
     
-    private func loadSlider() {
-        sliderViewController?.removeFromParent()
-        sliderViewController?.view.removeFromSuperview()
-        
-        initSlider()
-
-        guard let sliderViewController = sliderViewController else {
-            return
-        }
-        
-        addChild(sliderViewController)
-        sliderViewController.view.translatesAutoresizingMaskIntoConstraints = false
-        view.addSubview(sliderViewController.view)
-        sliderViewController.didMove(toParent: self)
-        
-        NSLayoutConstraint.activate([
-            sliderViewController.view.widthAnchor.constraint(equalTo: view.widthAnchor),
-            sliderViewController.view.heightAnchor.constraint(equalTo: view.heightAnchor),
-            sliderViewController.view.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-            sliderViewController.view.centerYAnchor.constraint(equalTo: view.centerYAnchor)
-        ])
+    private func updateSlider() {
+        createViewModel()
+        preciseSliderView.updateView(with: viewModel, with: dataSource)
     }
     
-    override public func viewDidLoad() {
-        loadSlider()
+    override public func loadView() {
         applyDelegate()
+        preciseSliderView.updateView(with: viewModel, with: dataSource)
+        view = preciseSliderView
     }
 }
 

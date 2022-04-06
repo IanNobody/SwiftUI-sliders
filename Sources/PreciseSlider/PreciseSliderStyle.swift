@@ -7,11 +7,11 @@
 
 import SwiftUI
 
-public struct PreciseSliderStyle {
-    public let backgroundColor: Color
-    public let defaultUnitColor: Color
-    public let highlitedUnitColor: Color
-    public let axisPointerColor: Color
+public class PreciseSliderStyle {
+    public var backgroundColor: Color
+    public var defaultUnitColor: Color
+    public var highlitedUnitColor: Color
+    public var axisPointerColor: Color
     
     public init(backgroundColor: Color = .black, defaultUnitColor: Color = .white, highlitedUnitColor: Color, axisPointerColor: Color = .blue) {
         self.backgroundColor = backgroundColor
