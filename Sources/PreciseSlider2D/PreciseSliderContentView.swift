@@ -30,87 +30,93 @@ struct PreciseSliderContentView<Content: View>: View, Animatable {
     var body: some View {
         GeometryReader { geometry in
             ZStack {
-                VStack(spacing: 0) {
-                    ForEach(0..<(isYInfinite ? 3 : 1), id: \.self) { _ in
-                        HStack(spacing: 0) {
-                            ForEach(0..<(isXInfinite ? 3 : 1), id: \.self) { _ in
-                                content(geometry.size, scale)
-                                    .frame(
-                                        width: geometry.size.width,
-                                        height: geometry.size.height
-                                    )
-                                    .clipShape(Rectangle())
+                ZStack {
+                    VStack(spacing: 0) {
+                        ForEach(0..<(isYInfinite ? 3 : 1), id: \.self) { _ in
+                            HStack(spacing: 0) {
+                                ForEach(0..<(isXInfinite ? 3 : 1), id: \.self) { _ in
+                                    content(geometry.size, scale)
+                                        .frame(
+                                            width: geometry.size.width,
+                                            height: geometry.size.height
+                                        )
+                                        .clipShape(Rectangle())
+                                }
                             }
                         }
                     }
+                    .scaleEffect(scale)
                 }
                 .frame(
                     width: geometry.size.width,
                     height: geometry.size.height
                 )
                 .offset(
-                    x: truncOffset(to: geometry.size).width,
-                    y: truncOffset(to: geometry.size).height
+                    x: truncOffset(to: geometry.size).width * scale.width,
+                    y: truncOffset(to: geometry.size).height * scale.height
                 )
-                .scaleEffect(scale)
                 
                 switch(style.pointerColor) {
                 case .invertedColor:
                     Rectangle()
                         .frame(width: 1, height: style.pointerSize.height)
                         .overlay(
-                            VStack(spacing: 0) {
-                                ForEach(0..<(isYInfinite ? 3 : 1), id: \.self) { _ in
-                                    HStack(spacing: 0) {
-                                        ForEach(0..<(isXInfinite ? 3 : 1), id: \.self) { _ in
-                                            content(geometry.size, scale)
-                                                .frame(
-                                                    width: geometry.size.width,
-                                                    height: geometry.size.height
-                                                )
-                                                .clipShape(Rectangle())
+                            ZStack {
+                                VStack(spacing: 0) {
+                                    ForEach(0..<(isYInfinite ? 3 : 1), id: \.self) { _ in
+                                        HStack(spacing: 0) {
+                                            ForEach(0..<(isXInfinite ? 3 : 1), id: \.self) { _ in
+                                                content(geometry.size, scale)
+                                                    .frame(
+                                                        width: geometry.size.width,
+                                                        height: geometry.size.height
+                                                    )
+                                                    .clipShape(Rectangle())
+                                            }
                                         }
                                     }
                                 }
+                                .scaleEffect(scale)
                             }
                             .frame(
                                 width: geometry.size.width,
                                 height: geometry.size.height
                             )
                             .offset(
-                                x: truncOffset(to: geometry.size).width,
-                                y: truncOffset(to: geometry.size).height
+                                x: truncOffset(to: geometry.size).width * scale.width,
+                                y: truncOffset(to: geometry.size).height * scale.height
                             )
-                            .scaleEffect(scale)
                         )
                         .clipShape(Rectangle())
                         .colorInvert()
                     Rectangle()
                         .frame(width: style.pointerSize.width, height: 1)
                         .overlay(
-                            VStack(spacing: 0) {
-                                ForEach(0..<(isYInfinite ? 3 : 1), id: \.self) { _ in
-                                    HStack(spacing: 0) {
-                                        ForEach(0..<(isXInfinite ? 3 : 1), id: \.self) { _ in
-                                            content(geometry.size, scale)
-                                                .frame(
-                                                    width: geometry.size.width,
-                                                    height: geometry.size.height
-                                                )
-                                                .clipShape(Rectangle())
+                            ZStack {
+                                VStack(spacing: 0) {
+                                    ForEach(0..<(isYInfinite ? 3 : 1), id: \.self) { _ in
+                                        HStack(spacing: 0) {
+                                            ForEach(0..<(isXInfinite ? 3 : 1), id: \.self) { _ in
+                                                content(geometry.size, scale)
+                                                    .frame(
+                                                        width: geometry.size.width,
+                                                        height: geometry.size.height
+                                                    )
+                                                    .clipShape(Rectangle())
+                                            }
                                         }
                                     }
                                 }
+                                .scaleEffect(scale)
                             }
                             .frame(
                                 width: geometry.size.width,
                                 height: geometry.size.height
                             )
                             .offset(
-                                x: truncOffset(to: geometry.size).width,
-                                y: truncOffset(to: geometry.size).height
+                                x: truncOffset(to: geometry.size).width * scale.width,
+                                y: truncOffset(to: geometry.size).height * scale.height
                             )
-                            .scaleEffect(scale)
                         )
                         .clipShape(Rectangle())
                         .colorInvert()
@@ -132,32 +138,34 @@ struct PreciseSliderContentView<Content: View>: View, Animatable {
                             Rectangle()
                                 .foregroundColor(style.axisBackgroundColor)
                             //
-                            VStack(spacing: 0) {
-                                ForEach(0..<(isYInfinite ? 3 : 1), id: \.self) { _ in
-                                    HStack(spacing: 0) {
-                                        ForEach(0..<(isXInfinite ? 3 : 1), id: \.self) { _ in
-                                            content(geometry.size, scale)
-                                                .frame(
-                                                    width: geometry.size.width,
-                                                    height: geometry.size.height
-                                                )
-                                                .clipShape(Rectangle())
+                            ZStack {
+                                VStack(spacing: 0) {
+                                    ForEach(0..<(isYInfinite ? 3 : 1), id: \.self) { _ in
+                                        HStack(spacing: 0) {
+                                            ForEach(0..<(isXInfinite ? 3 : 1), id: \.self) { _ in
+                                                content(geometry.size, scale)
+                                                    .frame(
+                                                        width: geometry.size.width,
+                                                        height: geometry.size.height
+                                                    )
+                                                    .clipShape(Rectangle())
+                                            }
                                         }
                                     }
                                 }
+                                .scaleEffect(
+                                    CGSize(
+                                        width: scale.width * 1.3,
+                                        height: scale.height * 1.3)
+                                )
                             }
                             .frame(
                                 width: geometry.size.width,
                                 height: geometry.size.height
                             )
                             .offset(
-                                x: truncOffset(to: geometry.size).width * 0.5,
-                                y: truncOffset(to: geometry.size).height * 0.5
-                            )
-                            .scaleEffect(
-                                CGSize(
-                                    width: scale.width * 1.3,
-                                    height: scale.height * 1.3)
+                                x: truncOffset(to: geometry.size).width * 0.5 * scale.width,
+                                y: truncOffset(to: geometry.size).height * 0.5 * scale.height
                             )
                             .blur(radius: 50)
                             .brightness(-0.3)
