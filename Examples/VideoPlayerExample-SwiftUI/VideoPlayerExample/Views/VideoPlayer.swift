@@ -54,7 +54,7 @@ struct VideoPlayer: View {
             )
             .frame(height: 50)
             .onChange(of: sliderViewModel.isEditing) { isEditing in
-                let value = sliderViewModel.safeValue
+                let value = sliderViewModel.value
                         
                 if isEditing {
                     videoViewModel.wasPlaying = videoViewModel.isPlaying
@@ -69,7 +69,14 @@ struct VideoPlayer: View {
             .preciseSliderStyle(
                 PreciseSliderStyle(
                     backgroundColor: Color(UIColor.systemBackground),
-                    defaultUnitColor: colorScheme == .dark ? .white : .black
+                    unitColor: { value, _ in
+                        if value == sliderViewModel.minValue || value == sliderViewModel.maxValue {
+                            return .blue
+                        }
+                        else {
+                            return colorScheme == .dark ? .white : .black
+                        }
+                    }
                 )
             )
         }

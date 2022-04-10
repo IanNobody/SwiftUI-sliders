@@ -50,7 +50,18 @@ struct PreciseAxisView<UnitLabel: View>: View, Animatable {
                 ForEach(0..<numberOfVisibleUnits(fromWidth: geometry.size.width), id: \.self) { index in
                     if isUnitVisible(ofIndex: index, withWidth: geometry.size.width)
                     {
-                        PreciseUnitView(isHighlited: isUnitHighlited(ofIndex: index, withFrameSize: geometry.size)) {
+                        PreciseUnitView(
+                            isHighlighted:
+                                isUnitHighlited(
+                                    ofIndex: index,
+                                    withFrameSize: geometry.size
+                                ),
+                            color:
+                                style.unitColor(
+                                    unitValue(forIndex: index, withWidth: geometry.size.width),
+                                    isUnitHighlited(ofIndex: index, withFrameSize: geometry.size)
+                                )
+                        ) {
                                 valueLabel?(unitValue(forIndex: index, withWidth: geometry.size.width), truncScale > 3 ? unit : 5 * unit)
                                 .zIndex(1)
                         }

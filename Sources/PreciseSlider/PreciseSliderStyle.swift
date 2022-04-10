@@ -9,23 +9,14 @@ import SwiftUI
 
 public class PreciseSliderStyle {
     public var backgroundColor: Color
-    public var defaultUnitColor: Color
-    public var highlightedUnitColor: Color
     public var axisPointerColor: Color
     
-    public init(backgroundColor: Color = .black, defaultUnitColor: Color = .white, highlitedUnitColor: Color, axisPointerColor: Color = .blue) {
-        self.backgroundColor = backgroundColor
-        self.defaultUnitColor = defaultUnitColor
-        self.highlightedUnitColor = highlitedUnitColor
-        self.axisPointerColor = axisPointerColor
-    }
+    public var unitColor: (_ value: Double, _ isHighlited: Bool) -> Color
     
-    // Konstruktor s výchozí barvou zvýrazněné jednotky
-    public init(backgroundColor: Color = .black, defaultUnitColor: Color = .white, axisPointerColor: Color = .blue) {
+    public init(backgroundColor: Color = .black, axisPointerColor: Color = .blue, unitColor: @escaping (_ value: Double, _ isHighlited: Bool) -> Color = { _, _ in .white }) {
         self.backgroundColor = backgroundColor
-        self.defaultUnitColor = defaultUnitColor
-        self.highlightedUnitColor = defaultUnitColor
         self.axisPointerColor = axisPointerColor
+        self.unitColor = unitColor
     }
 }
 

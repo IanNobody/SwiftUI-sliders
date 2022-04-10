@@ -9,7 +9,8 @@ import SwiftUI
 
 struct PreciseUnitView<UnitLabel: View>: View {
     @Environment(\.preciseSliderStyle) var style
-    let isHighlited: Bool
+    let isHighlighted: Bool
+    let color: Color
     @ViewBuilder let unitLabel: () -> UnitLabel
     
     var body: some View {
@@ -17,11 +18,8 @@ struct PreciseUnitView<UnitLabel: View>: View {
             ZStack {
                 Rectangle()
                     .frame(width: 1)
-                    .foregroundColor(
-                        isHighlited ?
-                            style.highlightedUnitColor : style.defaultUnitColor
-                    )
-                if isHighlited {
+                    .foregroundColor(color)
+                if isHighlighted {
                     unitLabel()
                         .background(style.backgroundColor)
                         .frame(height: geometry.size.height / 3)
@@ -37,7 +35,7 @@ struct PreciseUnitView<UnitLabel: View>: View {
 
 struct PreciseUnitView_Previews: PreviewProvider {
     static var previews: some View {
-        PreciseUnitView(isHighlited: true) {
+        PreciseUnitView(isHighlighted: true, color: .white) {
             Text("0")
                 .foregroundColor(.white)
         }

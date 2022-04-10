@@ -36,28 +36,15 @@ public class UIPreciseSlider2D: UIView {
         }
     }
     
-    public var defaultUnitColor: UIColor {
+    public var unitColor: (_ value: Double, _ isHighlighted: Bool) -> UIColor {
         get {
-            UIColor(style.defaultUnitColor)
-        }
-        set {
-            style.defaultUnitColor = Color(uiColor: newValue)
-            
-            if !hasHighlitedUnitDifferentColor {
-                style.highlightedUnitColor = style.defaultUnitColor
+            { value, isHighlighted in
+                UIColor(self.style.unitColor(value, isHighlighted))
             }
         }
-    }
-    
-    public var hasHighlitedUnitDifferentColor: Bool = false
-    
-    public var highlightedUnitColor: UIColor {
-        get {
-            UIColor(style.highlightedUnitColor)
-        }
         set {
-            if !hasHighlitedUnitDifferentColor {
-                style.highlightedUnitColor = Color(uiColor: newValue)
+            style.unitColor = { value, isHighlighted in
+                Color(uiColor: newValue(value, isHighlighted))
             }
         }
     }

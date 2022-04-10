@@ -10,30 +10,18 @@ import SwiftUI
 public class PreciseSlider2DStyle {
     public var axisBackgroundColor: Color
     public var axisPointerColor: Color
-    public var defaultUnitColor: Color
-    public var highlightedUnitColor: Color
     public var background: PreciseSlider2DBackground
     public var pointerColor: PreciseSlider2DPointerColor
     public var pointerSize: CGSize
+    public var unitColor: (_ value: Double, _ isHighlighted: Bool) -> Color
     
-    init(axisBackgroundColor: Color = .black, axisPointerColor: Color = .blue, defaultUnitColor: Color = .white, highlightedColor: Color, background: PreciseSlider2DBackground = .blurredContent, pointerColor: PreciseSlider2DPointerColor = .invertedColor, pointerSize: CGSize = CGSize(width: 20, height: 20)) {
+    init(axisBackgroundColor: Color = .black, axisPointerColor: Color = .blue, background: PreciseSlider2DBackground = .blurredContent, pointerColor: PreciseSlider2DPointerColor = .invertedColor, pointerSize: CGSize = CGSize(width: 20, height: 20), unitColor: @escaping (_ value: Double, _ isHighlighted: Bool) -> Color = { _, _ in .white }) {
         self.axisBackgroundColor = axisBackgroundColor
         self.axisPointerColor = axisPointerColor
-        self.defaultUnitColor = defaultUnitColor
-        self.highlightedUnitColor = highlightedColor
         self.background = background
         self.pointerColor = pointerColor
         self.pointerSize = pointerSize
-    }
-    
-    init(axisBackgroundColor: Color = .black, axisPointerColor: Color = .blue, defaultUnitColor: Color = .white, background: PreciseSlider2DBackground = .blurredContent, pointerColor: PreciseSlider2DPointerColor = .invertedColor, pointerSize: CGSize = CGSize(width: 20, height: 20)) {
-        self.axisBackgroundColor = axisBackgroundColor
-        self.axisPointerColor = axisPointerColor
-        self.defaultUnitColor = defaultUnitColor
-        self.highlightedUnitColor = defaultUnitColor
-        self.background = background
-        self.pointerColor = pointerColor
-        self.pointerSize = pointerSize
+        self.unitColor = unitColor
     }
     
     public enum PreciseSlider2DBackground: Equatable {

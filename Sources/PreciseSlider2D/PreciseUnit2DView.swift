@@ -13,6 +13,7 @@ struct PreciseUnit2DView<ValueLabel: View>: View {
     let isActive: Bool
     let unitHeight: CGFloat
     let isHighlited: Bool
+    let color: Color
     @ViewBuilder let valueLabel: () -> ValueLabel
     
     var body: some View {
@@ -25,10 +26,7 @@ struct PreciseUnit2DView<ValueLabel: View>: View {
                 
                 Rectangle()
                     .frame(maxWidth: 1, maxHeight: unitHeight)
-                    .foregroundColor(
-                        isHighlited ?
-                            style.highlightedUnitColor : style.defaultUnitColor
-                    )
+                    .foregroundColor(color)
                 
                 if isHighlited {
                     valueLabel()
@@ -50,7 +48,7 @@ struct PreciseUnit2DView<ValueLabel: View>: View {
 
 struct PreciseUnit2DView_Previews: PreviewProvider {
     static var previews: some View {
-        PreciseUnit2DView(isActive: true, unitHeight: 15, isHighlited: true, valueLabel: {
+        PreciseUnit2DView(isActive: true, unitHeight: 15, isHighlited: true, color: .white, valueLabel: {
             Text("100")
                 .font(.system(size: 5))
                 .rotationEffect(.degrees(-90))

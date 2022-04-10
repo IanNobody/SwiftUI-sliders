@@ -44,9 +44,15 @@ public class VideoPlayer: UIViewController, PreciseSliderDelegate {
         sliderViewController.preciseSliderView.axisBackgroundColor =
             UITraitCollection.current.userInterfaceStyle == .dark ?
             .black : .white
-        sliderViewController.preciseSliderView.defaultUnitColor =
-            UITraitCollection.current.userInterfaceStyle == .dark ?
-            .white : .black
+        sliderViewController.preciseSliderView.unitColor = { value, _ in
+            if value == videoPlayer.maxValue || value == videoPlayer.minValue {
+                return .link
+            }
+            else {
+                return UITraitCollection.current.userInterfaceStyle == .dark ?
+                    .white : .black
+            }
+        }
         
         view.addSubview(videoPlayer)
         view.addSubview(sliderViewController.view)

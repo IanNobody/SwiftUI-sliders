@@ -60,7 +60,29 @@ struct PreciseAxis2DView<ValueLabel:View>: View, Animatable {
                 ForEach(0..<numberOfVisibleUnits(fromWidth: geometry.size.width), id: \.self) { index in
                     //
                     if isUnitVisible(ofIndex: index, withWidth: geometry.size.width) {
-                        PreciseUnit2DView(isActive: active, unitHeight: unitHeight(forIndex: index, withFrameSize: geometry.size), isHighlited: isUnitHighlighted(ofIndex: index, withFrameSize: geometry.size), valueLabel: {
+                        PreciseUnit2DView(
+                            isActive: active,
+                            unitHeight: unitHeight(
+                                forIndex: index,
+                                withFrameSize: geometry.size
+                            ),
+                            isHighlited:
+                                isUnitHighlighted(
+                                    ofIndex: index,
+                                    withFrameSize: geometry.size
+                                ),
+                            color:
+                                style.unitColor(
+                                    unitValue(
+                                        forIndex: index,
+                                        withWidth: geometry.size.width
+                                    ),
+                                    isUnitHighlighted(
+                                        ofIndex: index,
+                                        withFrameSize: geometry.size
+                                    )
+                                ),
+                            valueLabel: {
                                 valueLabel?(unitValue(forIndex: index, withWidth: geometry.size.width), unit)
                                     .zIndex(1)
                             }
