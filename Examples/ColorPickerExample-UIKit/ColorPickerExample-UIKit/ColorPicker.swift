@@ -99,8 +99,8 @@ class ColorPicker: UIViewController, PreciseSlider2DDataSource {
     
     func setupLayout() {
         NSLayoutConstraint.activate([
-            slider.view.heightAnchor.constraint(equalToConstant: 350),
-            slider.view.widthAnchor.constraint(equalToConstant: 350),
+            slider.view.widthAnchor.constraint(equalTo: view.layoutMarginsGuide.widthAnchor),
+            slider.view.heightAnchor.constraint(equalTo: view.layoutMarginsGuide.widthAnchor),
             slider.view.centerXAnchor.constraint(equalTo: view.centerXAnchor),
             slider.view.centerYAnchor.constraint(equalTo: view.centerYAnchor),
             //

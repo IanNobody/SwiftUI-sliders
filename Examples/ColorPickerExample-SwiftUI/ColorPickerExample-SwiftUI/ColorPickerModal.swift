@@ -37,78 +37,92 @@ struct ColorPickerModal: View {
     }
     
     var body: some View {
-        ZStack {
-            if isShowing {
-                Color.black.ignoresSafeArea().opacity(0.75)
-                    .gesture(
-                        TapGesture()
-                            .onEnded {
-                                isShowing = false
-                            }
-                    )
-                //
-                VStack(spacing: 20) {
-                    PreciseSlider2DView(
-                        axisX: hueAxis,
-                        axisY: saturationAxis,
-                        content: { size, scale in
-                            Rectangle()
-                                .fill (
-                                    LinearGradient(
-                                        colors: [
-                                            Color(hue: 0, saturation: 1, brightness: 1),
-                                            Color(hue: 60/360, saturation: 1, brightness: 1),
-                                            Color(hue: 120/360, saturation: 1, brightness: 1),
-                                            Color(hue: 180/360, saturation: 1, brightness: 1),
-                                            Color(hue: 240/360, saturation: 1, brightness: 1),
-                                            Color(hue: 300/360, saturation: 1, brightness: 1),
-                                            Color(hue: 1, saturation: 1, brightness: 1)
-                                        ],
-                                        startPoint: .leading,
-                                        endPoint: .trailing
-                                    )
-                                )
-                                .overlay {
-                                    Rectangle()
-                                        .fill(
-                                            LinearGradient(
-                                                colors: [
-                                                    Color(hue: 0, saturation: 0, brightness: 1),
-                                                    Color(hue: 0, saturation: 0, brightness: 1)
-                                                        .opacity(0)
-                                                ],
-                                                startPoint: .top,
-                                                endPoint: .bottom
-                                            )
-                                        )
+        GeometryReader { geometry in
+            ZStack {
+                if isShowing {
+                    Color.black.ignoresSafeArea().opacity(0.75)
+                        .gesture(
+                            TapGesture()
+                                .onEnded {
+                                    isShowing = false
                                 }
-                        },
-                        axisXLabel: { value,step in
-                            Text("\(formatLabelValue(value))")
-                                .font(.system(size: 7))
-                                .foregroundColor(.white)
-                        },
-                        axisYLabel: { value,step in
-                            Text("\(formatLabelValue(value))")
-                                .font(.system(size: 7))
-                                .foregroundColor(.white)
-                        })
-                    .frame(width: 320, height: 320)
-                    
-                    Button("Hotovo") {
-                        completition?(hueAxis.value, saturationAxis.value)
-                        isShowing = false
+                        )
+                    //
+                    VStack(spacing: 20) {
+                        PreciseSlider2DView(
+                            axisX: hueAxis,
+                            axisY: saturationAxis,
+                            content: { size, scale in
+                                Rectangle()
+                                    .fill (
+                                        LinearGradient(
+                                            colors: [
+                                                Color(hue: 0, saturation: 1, brightness: 1),
+                                                Color(hue: 60/360, saturation: 1, brightness: 1),
+                                                Color(hue: 120/360, saturation: 1, brightness: 1),
+                                                Color(hue: 180/360, saturation: 1, brightness: 1),
+                                                Color(hue: 240/360, saturation: 1, brightness: 1),
+                                                Color(hue: 300/360, saturation: 1, brightness: 1),
+                                                Color(hue: 1, saturation: 1, brightness: 1)
+                                            ],
+                                            startPoint: .leading,
+                                            endPoint: .trailing
+                                        )
+                                    )
+                                    .overlay {
+                                        Rectangle()
+                                            .fill(
+                                                LinearGradient(
+                                                    colors: [
+                                                        Color(hue: 0, saturation: 0, brightness: 1),
+                                                        Color(hue: 0, saturation: 0, brightness: 1)
+                                                            .opacity(0)
+                                                    ],
+                                                    startPoint: .top,
+                                                    endPoint: .bottom
+                                                )
+                                            )
+                                    }
+                            },
+                            axisXLabel: { value,step in
+                                Text("\(formatLabelValue(value))")
+                                    .font(.system(size: 7))
+                                    .foregroundColor(.white)
+                            },
+                            axisYLabel: { value,step in
+                                Text("\(formatLabelValue(value))")
+                                    .font(.system(size: 7))
+                                    .foregroundColor(.white)
+                            })
+                        .frame(
+                            width: colorPickerSize(from: geometry.size),
+                            height: colorPickerSize(from: geometry.size)
+                        )
+                        
+                        Button("Hotovo") {
+                            completition?(hueAxis.value, saturationAxis.value)
+                            isShowing = false
+                        }
+                        .font(.system(size: 12))
+                        .padding(8)
+                        .background(.tint)
+                        .cornerRadius(10)
+                        .foregroundColor(.white)
                     }
-                    .font(.system(size: 12))
-                    .padding(8)
-                    .background(.tint)
-                    .cornerRadius(10)
-                    .foregroundColor(.white)
+                    .transition(.move(edge: .bottom))
                 }
-                .transition(.move(edge: .bottom))
             }
+            .animation(Animation.easeInOut, value: isShowing)
         }
-        .animation(Animation.easeInOut, value: isShowing)
+    }
+    
+    private func colorPickerSize(from frameSize: CGSize) -> CGFloat {
+        if frameSize.width > frameSize.height {
+            return frameSize.height * 0.7
+        }
+        else {
+            return frameSize.width * 0.9
+        }
     }
     
     private func formatLabelValue(_ value: Double) -> String {
