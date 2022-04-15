@@ -11,11 +11,14 @@ import PreciseSlider2D
 struct ColorPickerModal: View {
     @ObservedObject private var hueAxis: PreciseAxis2DViewModel
     @ObservedObject private var saturationAxis: PreciseAxis2DViewModel
-    public var completition: ((_ hue: Double, _ saturation: Double) -> ())?
-    
+    public var completition: ((_ hue: Double, _ saturation: Double) -> Void)?
+
     @Binding var isShowing: Bool
-    
-    public init(defaultHue: Double, defaultSaturation: Double, isShowing: Binding<Bool>, completition: ((_ hue: Double, _ saturation: Double) -> ())?) {
+
+    public init(defaultHue: Double,
+                defaultSaturation: Double,
+                isShowing: Binding<Bool>,
+                completition: ((_ hue: Double, _ saturation: Double) -> Void)?) {
         hueAxis = PreciseAxis2DViewModel(
             defaultValue: defaultHue,
             maxValue: 360,
@@ -23,7 +26,7 @@ struct ColorPickerModal: View {
             maxScale: 10,
             numberOfUnits: 10
         )
-        
+
         saturationAxis = PreciseAxis2DViewModel(
             defaultValue: defaultSaturation,
             maxValue: 100,
@@ -31,11 +34,11 @@ struct ColorPickerModal: View {
             maxScale: 10,
             numberOfUnits: 10
         )
-        
+
         self._isShowing = isShowing
         self.completition = completition
     }
-    
+
     var body: some View {
         GeometryReader { geometry in
             ZStack {
@@ -52,9 +55,9 @@ struct ColorPickerModal: View {
                         PreciseSlider2DView(
                             axisX: hueAxis,
                             axisY: saturationAxis,
-                            content: { size, scale in
+                            content: { _, _ in
                                 Rectangle()
-                                    .fill (
+                                    .fill(
                                         LinearGradient(
                                             colors: [
                                                 Color(hue: 0, saturation: 1, brightness: 1),
@@ -84,12 +87,12 @@ struct ColorPickerModal: View {
                                             )
                                     }
                             },
-                            axisXLabel: { value,step in
+                            axisXLabel: { value, _ in
                                 Text("\(formatLabelValue(value))")
                                     .font(.system(size: 7))
                                     .foregroundColor(.white)
                             },
-                            axisYLabel: { value,step in
+                            axisYLabel: { value, _ in
                                 Text("\(formatLabelValue(value))")
                                     .font(.system(size: 7))
                                     .foregroundColor(.white)
@@ -98,7 +101,7 @@ struct ColorPickerModal: View {
                             width: colorPickerSize(from: geometry.size),
                             height: colorPickerSize(from: geometry.size)
                         )
-                        
+
                         Button("Hotovo") {
                             completition?(hueAxis.value, saturationAxis.value)
                             isShowing = false
@@ -115,7 +118,7 @@ struct ColorPickerModal: View {
             .animation(Animation.easeInOut, value: isShowing)
         }
     }
-    
+
     private func colorPickerSize(from frameSize: CGSize) -> CGFloat {
         if frameSize.width > frameSize.height {
             return frameSize.height * 0.7
@@ -124,7 +127,7 @@ struct ColorPickerModal: View {
             return frameSize.width * 0.9
         }
     }
-    
+
     private func formatLabelValue(_ value: Double) -> String {
         String(round(abs(value) * 100) / 100)
     }
@@ -137,7 +140,7 @@ struct ColorPickerModal_Previews: PreviewProvider {
             defaultSaturation: 50,
             isShowing: State(initialValue: true).projectedValue
         ) { _, _ in
-        
+
         }
     }
 }

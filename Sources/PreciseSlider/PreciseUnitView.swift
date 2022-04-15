@@ -9,10 +9,12 @@ import SwiftUI
 
 struct PreciseUnitView<UnitLabel: View>: View {
     @Environment(\.preciseSliderStyle) var style
+    //
     let isHighlighted: Bool
     let color: Color
+    //
     @ViewBuilder let unitLabel: () -> UnitLabel
-    
+
     var body: some View {
         GeometryReader { geometry in
             ZStack {
@@ -35,9 +37,13 @@ struct PreciseUnitView<UnitLabel: View>: View {
 
 struct PreciseUnitView_Previews: PreviewProvider {
     static var previews: some View {
-        PreciseUnitView(isHighlighted: true, color: .white) {
-            Text("0")
-                .foregroundColor(.white)
-        }
+        PreciseUnitView(
+            isHighlighted: true,
+            color: .white,
+            unitLabel: {
+                Text("0")
+                    .foregroundColor(.white)
+            }
+        )
     }
 }

@@ -11,10 +11,10 @@ import PreciseSlider
 
 struct VideoPlayer: View {
     @Environment(\.colorScheme) var colorScheme
-    
+
     @ObservedObject var videoViewModel: VideoPlayerViewModel
     @ObservedObject var sliderViewModel: PreciseSliderViewModel
-    
+
     var body: some View {
         if videoViewModel.player != nil {
             GeometryReader { proxy in
@@ -32,7 +32,7 @@ struct VideoPlayer: View {
                             if videoViewModel.player?.currentTime() == videoViewModel.player?.currentItem?.duration {
                                 videoViewModel.player?.seek(to: CMTime.zero)
                             }
-                            
+
                             videoViewModel.resumePlayback()
                         }
                     },
@@ -55,7 +55,7 @@ struct VideoPlayer: View {
             .frame(height: 50)
             .onChange(of: sliderViewModel.isEditing) { isEditing in
                 let value = sliderViewModel.value
-                        
+
                 if isEditing {
                     videoViewModel.wasPlaying = videoViewModel.isPlaying
                     videoViewModel.player?.pause()
@@ -63,7 +63,7 @@ struct VideoPlayer: View {
                 else if videoViewModel.wasPlaying {
                     videoViewModel.player?.play()
                 }
-                
+
                 videoViewModel.player?.seek(to: .init(seconds: value, preferredTimescale: CMTimeScale(NSEC_PER_SEC)))
             }
             .preciseSliderStyle(
@@ -81,11 +81,11 @@ struct VideoPlayer: View {
             )
         }
     }
-    
+
     private func valueToTimeString(value: Double, step: Double) -> String {
         let date = Date(timeIntervalSince1970: value)
         let formatter = DateFormatter()
-        
+
         if step >= 1 {
             formatter.dateFormat = "m:ss"
         }
@@ -105,7 +105,7 @@ struct VideoPlayer: View {
                 formatter.dateFormat = "s.SSS"
             }
         }
-        
+
         return formatter.string(from: date)
     }
 }

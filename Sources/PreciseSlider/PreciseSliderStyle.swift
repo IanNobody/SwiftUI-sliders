@@ -10,10 +10,11 @@ import SwiftUI
 public class PreciseSliderStyle {
     public var backgroundColor: Color
     public var axisPointerColor: Color
-    
+
     public var unitColor: (_ value: Double, _ isHighlited: Bool) -> Color
-    
-    public init(backgroundColor: Color = .black, axisPointerColor: Color = .blue, unitColor: @escaping (_ value: Double, _ isHighlited: Bool) -> Color = { _, _ in .white }) {
+
+    public init(backgroundColor: Color = .black, axisPointerColor: Color = .blue,
+                unitColor: @escaping (_ value: Double, _ isHighlited: Bool) -> Color = { _, _ in .white }) {
         self.backgroundColor = backgroundColor
         self.axisPointerColor = axisPointerColor
         self.unitColor = unitColor

@@ -15,37 +15,37 @@ class VideoPlayerViewModel: ObservableObject {
     @Published public var isLoading: Bool = false
     public var slider: PreciseSliderViewModel?
     public var wasPlaying: Bool = false
-    
+
     private var displaylink: CADisplayLink?
-    
+
     public var videoDuration: Double {
         player?.currentItem?.asset.duration.seconds ?? 0.0
     }
-    
+
     public func pausePlayback() {
         player?.pause()
         displaylink?.isPaused = true
         isPlaying = false
     }
-    
+
     public func resumePlayback() {
         displaylink?.isPaused = false
         player?.play()
         isPlaying = true
     }
-    
+
     private func initPlayer(videoUrl: URL) {
         player = AVPlayer(url: videoUrl)
-        
+
         if displaylink == nil {
             displaylink = CADisplayLink(target: self, selector: #selector(syncSlider))
             displaylink?.preferredFrameRateRange = .default
             displaylink?.add(to: .main, forMode: .default)
             displaylink?.isPaused = true
         }
-        
+
         self.player?.actionAtItemEnd = .pause
-        
+
         NotificationCenter.default.addObserver(
             self,
             selector: #selector(videoDidEnd),
@@ -53,24 +53,24 @@ class VideoPlayerViewModel: ObservableObject {
             object: nil
         )
     }
-    
+
     @objc private func syncSlider() {
         guard let currentTime = player?.currentItem?.currentTime().seconds
         else { return }
-        
+
         if player?.rate != 0 && player?.error == nil && slider?.isEditing != true {
             slider?.move(toValue: currentTime)
         }
     }
-    
+
     @objc private func videoDidEnd() {
         isPlaying = false
     }
-    
+
     private func initSlider() {
         guard let duration = player?.currentItem?.asset.duration.seconds
         else { return }
-        
+
         slider = PreciseSliderViewModel(
             defaultValue: 0,
             minValue: 0,
@@ -78,13 +78,13 @@ class VideoPlayerViewModel: ObservableObject {
             maxScale: 10.0
         )
     }
-    
+
     public func loadVideo(videoUrl: URL) {
         initPlayer(videoUrl: videoUrl)
         initSlider()
         isLoading = false
     }
-    
+
     public func dropVideo() {
         player = nil
         slider = nil

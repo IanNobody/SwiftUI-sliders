@@ -11,7 +11,7 @@ import AVKit
 struct VideoView: UIViewRepresentable {
     @Binding var videoPlayer: AVPlayer?
     let frame: CGRect
-    
+
     func makeUIView(context: Context) -> some UIView {
         guard let videoPlayer = videoPlayer else {
             return UIView()
@@ -21,11 +21,11 @@ struct VideoView: UIViewRepresentable {
         let playerLayer = AVPlayerLayer(player: videoPlayer)
         playerLayer.frame = view.frame
         playerLayer.videoGravity = .resizeAspect
-        
+
         view.layer.addSublayer(playerLayer)
         return view
     }
-    
+
     func updateUIView(_ uiView: UIViewType, context: Context) {
         uiView.layer.frame = uiView.frame
     }

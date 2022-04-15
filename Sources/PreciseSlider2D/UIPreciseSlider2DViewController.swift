@@ -14,30 +14,30 @@ import Combine
 public class UIPreciseSlider2DViewController: UIViewController {
     @ObservedObject var axisXViewModel: PreciseAxis2DViewModel = PreciseAxis2DViewModel()
     @ObservedObject var axisYViewModel: PreciseAxis2DViewModel = PreciseAxis2DViewModel()
-    
+
     public var axisXDataSource: PreciseAxis2DDataSource? {
         didSet {
             createAxisXViewModel()
             updateSlider()
         }
     }
-    
+
     public var axisYDataSource: PreciseAxis2DDataSource? {
         didSet {
             createAxisYViewModel()
             updateSlider()
         }
     }
-    
+
     public var dataSource: PreciseSlider2DDataSource? {
         didSet {
             updateSlider()
         }
     }
-    
-    public var axisXDelegate: PreciseAxis2DDelegate?
-    public var axisYDelegate: PreciseAxis2DDelegate?
-    
+
+    public weak var axisXDelegate: PreciseAxis2DDelegate?
+    public weak var axisYDelegate: PreciseAxis2DDelegate?
+
     public var axisXValue: Double {
         get {
             axisXViewModel.value
@@ -46,8 +46,8 @@ public class UIPreciseSlider2DViewController: UIViewController {
             axisXViewModel.move(toValue: newValue)
         }
     }
-    
-    public var axisXScale: Double  {
+
+    public var axisXScale: Double {
         get {
             axisXViewModel.scale
         }
@@ -55,7 +55,7 @@ public class UIPreciseSlider2DViewController: UIViewController {
             axisXViewModel.zoom(toValue: newValue)
         }
     }
-    
+
     public var axisYValue: Double {
         get {
             axisYViewModel.value
@@ -64,8 +64,8 @@ public class UIPreciseSlider2DViewController: UIViewController {
             axisYViewModel.move(toValue: newValue)
         }
     }
-    
-    public var axisYScale: Double  {
+
+    public var axisYScale: Double {
         get {
             axisYViewModel.scale
         }
@@ -73,30 +73,30 @@ public class UIPreciseSlider2DViewController: UIViewController {
             axisYViewModel.zoom(toValue: newValue)
         }
     }
-    
+
     public var isEditingValue: Bool {
         axisXViewModel.isEditing || axisYViewModel.isEditing
     }
-    
+
     private var valueXPublisher: AnyCancellable?
     private var scaleXPublisher: AnyCancellable?
     private var interactionXPublisher: AnyCancellable?
-    
+
     private var valueYPublisher: AnyCancellable?
     private var scaleYPublisher: AnyCancellable?
     private var interactionYPublisher: AnyCancellable?
-    
+
     public var preciseSlider2DView = UIPreciseSlider2D()
-    
+
     private func applyAxisXDelegate() {
         valueXPublisher = axisXViewModel.valuePublisher.sink { newValue in
             self.axisXDelegate?.valueDidChange(value: newValue)
         }
-        
+
         scaleXPublisher = axisXViewModel.$scale.sink { newScale in
             self.axisXDelegate?.scaleDidChange(scale: newScale)
         }
-        
+
         interactionXPublisher = axisXViewModel.$isEditing.removeDuplicates().sink { isEditing in
             if isEditing {
                 self.axisXDelegate?.didBeginEditing()
@@ -106,16 +106,16 @@ public class UIPreciseSlider2DViewController: UIViewController {
             }
         }
     }
-    
+
     private func applyAxisYDelegate() {
         valueYPublisher = axisYViewModel.valuePublisher.sink { newValue in
             self.axisYDelegate?.valueDidChange(value: newValue)
         }
-        
+
         scaleYPublisher = axisYViewModel.$scale.sink { newScale in
             self.axisYDelegate?.scaleDidChange(scale: newScale)
         }
-        
+
         interactionYPublisher = axisYViewModel.$isEditing.removeDuplicates().sink { isEditing in
             if isEditing {
                 self.axisYDelegate?.didBeginEditing()
@@ -143,7 +143,7 @@ public class UIPreciseSlider2DViewController: UIViewController {
             axisXViewModel = PreciseAxis2DViewModel()
         }
     }
-    
+
     private func createAxisYViewModel() {
         if let axisYDataSource = axisYDataSource {
             axisYViewModel = PreciseAxis2DViewModel(
@@ -161,7 +161,7 @@ public class UIPreciseSlider2DViewController: UIViewController {
             axisYViewModel = PreciseAxis2DViewModel()
         }
     }
-    
+
     private func updateSlider() {
         preciseSlider2DView.updateView(
             axisXViewModel: axisXViewModel,
@@ -171,18 +171,18 @@ public class UIPreciseSlider2DViewController: UIViewController {
             dataSource: dataSource
         )
     }
-    
+
     override public func loadView() {
         applyAxisXDelegate()
         applyAxisYDelegate()
         updateSlider()
         view = preciseSlider2DView
     }
-    
+
     struct PreciseSlider2DContent: View {
         let image: UIImage?
         let frameSize: CGSize
-        
+
         var body: some View {
             if let image = image {
                 Image(uiImage: image)

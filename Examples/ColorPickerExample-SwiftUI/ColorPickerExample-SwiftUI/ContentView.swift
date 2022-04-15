@@ -11,7 +11,7 @@ struct ContentView: View {
     @State var showingPicker = false
     @State var buttonHue: Double = 220/360
     @State var buttonSaturation: Double = 79/100
-    
+
     var body: some View {
         ZStack {
             Button("Vybrat barvu") {
@@ -21,7 +21,7 @@ struct ContentView: View {
             .foregroundColor(.black)
             .background(buttonColor)
             .cornerRadius(10)
-        
+
             ColorPickerModal(
                 defaultHue: buttonHue * 360,
                 defaultSaturation: buttonSaturation * 100,
@@ -32,7 +32,7 @@ struct ContentView: View {
             }
         }
     }
-    
+
     var buttonColor: Color {
         Color(hue: buttonHue, saturation: buttonSaturation, brightness: 1)
     }

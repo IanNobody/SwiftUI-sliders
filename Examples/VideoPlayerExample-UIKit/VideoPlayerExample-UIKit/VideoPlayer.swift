@@ -10,37 +10,43 @@ import PreciseSlider
 import AVFoundation
 
 public class VideoPlayer: UIViewController, PreciseSliderDelegate {
-    private let playImage = UIImage(systemName: "play.fill", withConfiguration:UIImage.SymbolConfiguration(weight: .medium))?.withTintColor(.tintColor, renderingMode: .alwaysOriginal)
-    private let pauseImage = UIImage(systemName: "pause.fill", withConfiguration:UIImage.SymbolConfiguration(weight: .medium))?.withTintColor(.tintColor, renderingMode: .alwaysOriginal)
-    
+    private let playImage = UIImage(
+        systemName: "play.fill",
+        withConfiguration: UIImage.SymbolConfiguration(weight: .medium)
+    )?.withTintColor(.tintColor, renderingMode: .alwaysOriginal)
+    private let pauseImage = UIImage(
+        systemName: "pause.fill",
+        withConfiguration: UIImage.SymbolConfiguration(weight: .medium)
+    )?.withTintColor(.tintColor, renderingMode: .alwaysOriginal)
+
     private var videoPlayer: VideoView?
     private var displaylink: CADisplayLink?
     private var playbackControl: UIButton?
     private var sliderViewController: UIPreciseSliderViewController?
-    
+
     public func removeSubviews() {
         videoPlayer?.removeFromSuperview()
         sliderViewController?.removeFromParent()
         sliderViewController?.view.removeFromSuperview()
         playbackControl?.removeFromSuperview()
     }
-    
+
     public func setupLayout(with player: AVPlayer) {
         let videoPlayer = VideoView()
         let sliderViewController = UIPreciseSliderViewController()
         let playbackControl = UIButton()
-        
+
         playbackControl.setBackgroundImage(playImage, for: .normal)
         playbackControl.addTarget(self, action: #selector(toggleVideo), for: .touchUpInside)
-        
+
         videoPlayer.translatesAutoresizingMaskIntoConstraints = false
         sliderViewController.view.translatesAutoresizingMaskIntoConstraints = false
         playbackControl.translatesAutoresizingMaskIntoConstraints = false
-        
+
         videoPlayer.showVideo(videoPlayer: player)
         sliderViewController.dataSource = videoPlayer
         sliderViewController.delegate = self
-        
+
         sliderViewController.preciseSliderView.axisBackgroundColor =
             UITraitCollection.current.userInterfaceStyle == .dark ?
             .black : .white
@@ -53,17 +59,17 @@ public class VideoPlayer: UIViewController, PreciseSliderDelegate {
                     .white : .black
             }
         }
-        
+
         view.addSubview(videoPlayer)
         view.addSubview(sliderViewController.view)
         addChild(sliderViewController)
         view.addSubview(playbackControl)
-        
+
         self.videoPlayer = videoPlayer
         self.sliderViewController = sliderViewController
         self.playbackControl = playbackControl
     }
-    
+
     private func setupConstrains() {
         guard let videoPlayer = videoPlayer,
               let sliderView = sliderViewController?.view,
@@ -71,7 +77,7 @@ public class VideoPlayer: UIViewController, PreciseSliderDelegate {
         else {
             return
         }
-        
+
         NSLayoutConstraint.activate([
             videoPlayer.leftAnchor.constraint(equalTo: view.leftAnchor),
             videoPlayer.rightAnchor.constraint(equalTo: view.rightAnchor),
@@ -89,13 +95,13 @@ public class VideoPlayer: UIViewController, PreciseSliderDelegate {
             playbackControl.centerXAnchor.constraint(equalTo: view.centerXAnchor)
         ])
     }
-    
+
     public func showContent(of player: AVPlayer) {
         removeSubviews()
         setupLayout(with: player)
         setupConstrains()
         initDisplayLink()
-        
+
         NotificationCenter.default.addObserver(
             self,
             selector: #selector(videoDidEnd),
@@ -103,11 +109,11 @@ public class VideoPlayer: UIViewController, PreciseSliderDelegate {
             object: nil
         )
     }
-    
+
     public func clearContent() {
         removeSubviews()
     }
-    
+
     private func initDisplayLink() {
         if displaylink == nil {
             displaylink = CADisplayLink(target: self, selector: #selector(syncSlider))
@@ -116,18 +122,18 @@ public class VideoPlayer: UIViewController, PreciseSliderDelegate {
             displaylink?.isPaused = true
         }
     }
-    
+
     @objc func syncSlider() {
         if sliderViewController?.isEditingValue == false {
             sliderViewController?.value = videoPlayer?.currentTime ?? Double.zero
         }
     }
-    
+
     @objc func videoDidEnd() {
         playbackControl?.setBackgroundImage(playImage, for: .normal)
         displaylink?.isPaused = true
     }
-    
+
     @objc func toggleVideo() {
         guard let videoPlayer = videoPlayer else {
             return
@@ -144,23 +150,23 @@ public class VideoPlayer: UIViewController, PreciseSliderDelegate {
             displaylink?.isPaused = false
         }
     }
-    
+
     public func didBeginEditing() {
         videoPlayer?.pause()
         displaylink?.isPaused = true
     }
-    
+
     public func valueDidChange(value: Double) {
         if videoPlayer?.isPlaying == false {
             videoPlayer?.move(to: value)
         }
     }
-    
+
     public func didEndEditing() {
         guard let videoPlayer = videoPlayer else {
             return
         }
-        
+
         videoPlayer.resume()
         displaylink?.isPaused = !videoPlayer.wasPlaying
     }

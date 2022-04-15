@@ -13,26 +13,25 @@ class ColorPicker: UIViewController, PreciseSlider2DDataSource {
     private var defaultSaturation: Double = 0
     private let slider = UIPreciseSlider2DViewController()
     private var doneButton: UIButton!
-    public var completion: ((_ hue: Double, _ saturation: Double) -> ())?
-    
+    public var completion: ((_ hue: Double, _ saturation: Double) -> Void)?
+
     var contentImage: UIImage?
-    
+
     func setDefaultValues(hue: Double, saturation: Double) {
         defaultHue = hue
         defaultSaturation = saturation
     }
-    
+
     var hue: Double {
         slider.axisXValue
     }
-    
+
     var saturation: Double {
         slider.axisYValue
     }
-    
+
     func contentImage(ofSize: CGSize, withScale: CGSize) -> UIImage? {
-        if contentImage == nil || contentImage?.size != ofSize
-        {
+        if contentImage == nil || contentImage?.size != ofSize {
             let colorLayer = CAGradientLayer()
             colorLayer.frame = CGRect(origin: CGPoint(x: 0, y: 0), size: ofSize)
             colorLayer.colors = [
@@ -46,7 +45,7 @@ class ColorPicker: UIViewController, PreciseSlider2DDataSource {
             ]
             colorLayer.startPoint = CGPoint(x: 0, y: 0)
             colorLayer.endPoint = CGPoint(x: 1, y: 0)
-            
+
             let saturationLayer = CAGradientLayer()
             saturationLayer.frame = CGRect(origin: CGPoint(x: 0, y: 0), size: ofSize)
             saturationLayer.colors = [
@@ -55,7 +54,7 @@ class ColorPicker: UIViewController, PreciseSlider2DDataSource {
             ]
             saturationLayer.startPoint = CGPoint(x: 0, y: 1)
             saturationLayer.endPoint = CGPoint(x: 0, y: 0)
-            
+
             UIGraphicsBeginImageContext(ofSize)
             colorLayer.render(in: UIGraphicsGetCurrentContext()!)
             saturationLayer.render(in: UIGraphicsGetCurrentContext()!)
@@ -63,19 +62,19 @@ class ColorPicker: UIViewController, PreciseSlider2DDataSource {
             UIGraphicsEndImageContext()
             contentImage = image
         }
-        
+
         return contentImage
     }
-    
+
     func initBackground() {
         view = UIView()
         view.backgroundColor = .clear
-        
+
         view.addGestureRecognizer(
             UITapGestureRecognizer(target: self, action: #selector(cancelPicking))
         )
     }
-    
+
     func initSlider() {
         slider.dataSource = self
         slider.axisXDataSource = AxisDataSource(with: defaultHue, maxValue: 360)
@@ -83,7 +82,7 @@ class ColorPicker: UIViewController, PreciseSlider2DDataSource {
         slider.view.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(slider.view)
     }
-    
+
     func initDoneButton() {
         let doneButton = UIButton()
         var configuration = UIButton.Configuration.filled()
@@ -93,10 +92,10 @@ class ColorPicker: UIViewController, PreciseSlider2DDataSource {
         doneButton.addTarget(self, action: #selector(donePicking), for: .touchUpInside)
         doneButton.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(doneButton)
-        
+
         self.doneButton = doneButton
     }
-    
+
     func setupLayout() {
         NSLayoutConstraint.activate([
             slider.view.widthAnchor.constraint(equalTo: view.layoutMarginsGuide.widthAnchor),
@@ -108,19 +107,19 @@ class ColorPicker: UIViewController, PreciseSlider2DDataSource {
             doneButton.topAnchor.constraint(equalTo: slider.view.layoutMarginsGuide.bottomAnchor, constant: 30)
         ])
     }
-    
+
     override func loadView() {
         initBackground()
         initSlider()
         initDoneButton()
         setupLayout()
     }
-    
+
     @objc private func donePicking() {
         completion?(hue, saturation)
         dismiss(animated: true)
     }
-    
+
     @objc private func cancelPicking() {
         dismiss(animated: true)
     }
@@ -132,16 +131,16 @@ class AxisDataSource: PreciseAxis2DDataSource {
     public var maxScale: Double = 10
     public var numberOfUnits: Int = 10
     public var defaultValue: Double
-    
+
     init(with defaultValue: Double, maxValue: Double) {
         self.defaultValue = defaultValue
         self.maxValue = maxValue
     }
-    
+
     public func unitLabelText(for value: Double, with stepSize: Double) -> String {
         String(round(value * 100) / 100)
     }
-    
+
     public func unitLabelFont(for value: Double, with stepSize: Double) -> UIFont {
         UIFont.systemFont(ofSize: 7)
     }

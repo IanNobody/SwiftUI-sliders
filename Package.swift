@@ -7,13 +7,13 @@ let package = Package(
     name: "SwiftUI-sliders",
     platforms: [
         .iOS(.v15),
-        .macOS(.v12),
+        .macOS(.v12)
     ],
     products: [
         // Products define the executables and libraries a package produces, and make them visible to other packages.
         .library(
             name: "SwiftUI-sliders",
-            targets: ["PreciseSlider", "PreciseSlider2D"]),
+            targets: ["PreciseSlider", "PreciseSlider2D"])
     ],
     dependencies: [
         // Dependencies declare other packages that this package depends on.
@@ -25,6 +25,6 @@ let package = Package(
         .target(name: "PreciseSlider"),
         .target(
             name: "PreciseSlider2D",
-            dependencies: ["PreciseSlider"]),
+            dependencies: ["PreciseSlider"])
     ]
 )

@@ -10,7 +10,7 @@ import SwiftUI
 struct ContentView: View {
     @ObservedObject var videoViewModel = VideoPlayerViewModel()
     @State var showPicker = false
-    
+
     var body: some View {
         VStack {
             HStack {
@@ -53,7 +53,7 @@ struct ContentView: View {
                 didFinishPicking: { didSelectItems in
                     showPicker = false
                     videoViewModel.isLoading = didSelectItems
-                    
+
                     if didSelectItems {
                         videoViewModel.dropVideo()
                     }

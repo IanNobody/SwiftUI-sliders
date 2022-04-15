@@ -17,13 +17,13 @@ class BlurModalController: UIPresentationController {
         else {
             return nil
         }
-        
+
         let view = UIView(frame: container.bounds)
         view.backgroundColor = .black.withAlphaComponent(0.75)
-        
+
         return view
     }()
-    
+
     override func presentationTransitionWillBegin() {
         guard
             let container = containerView,
@@ -31,38 +31,38 @@ class BlurModalController: UIPresentationController {
         else {
             return
         }
-        
+
         container.alpha = 1
         container.addSubview(blurView)
         blurView.addSubview(presentedViewController.view)
-        
-        coordinator.animate { [weak self] context in
+
+        coordinator.animate { [weak self] _ in
             guard let `self` = self
             else {
                 return
             }
-            
+
             self.blurView.alpha = 1
         }
     }
-    
+
     override func dismissalTransitionWillBegin() {
         guard
             let coordinator = presentingViewController.transitionCoordinator
         else {
             return
         }
-        
-        coordinator.animate { [weak self] (context) -> Void in
+
+        coordinator.animate { [weak self] _ -> Void in
             guard let `self` = self
             else {
                 return
             }
-            
-            self.blurView.alpha = 1
+
+            self.blurView.alpha = 0
         }
     }
-    
+
     override func dismissalTransitionDidEnd(_ completed: Bool) {
         blurView.removeFromSuperview()
     }
@@ -72,8 +72,10 @@ final class BlurModalDelegate: NSObject, UIViewControllerTransitioningDelegate {
     init(from presented: UIViewController, to presenting: UIViewController) {
         super.init()
     }
-    
-    func presentationController(forPresented presented: UIViewController, presenting: UIViewController?, source: UIViewController) -> UIPresentationController? {
+
+    func presentationController(forPresented presented: UIViewController,
+                                presenting: UIViewController?,
+                                source: UIViewController) -> UIPresentationController? {
         BlurModalController(presentedViewController: presented, presenting: presenting)
     }
 }
