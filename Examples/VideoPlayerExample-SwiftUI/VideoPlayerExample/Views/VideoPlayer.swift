@@ -64,7 +64,11 @@ struct VideoPlayer: View {
                     videoViewModel.player?.play()
                 }
 
-                videoViewModel.player?.seek(to: .init(seconds: value, preferredTimescale: CMTimeScale(NSEC_PER_SEC)))
+                videoViewModel.player?.seek(
+                    to: .init(seconds: value, preferredTimescale: CMTimeScale(NSEC_PER_SEC)),
+                    toleranceBefore: CMTime.zero,
+                    toleranceAfter: CMTime.zero
+                )
             }
             .preciseSliderStyle(
                 PreciseSliderStyle(

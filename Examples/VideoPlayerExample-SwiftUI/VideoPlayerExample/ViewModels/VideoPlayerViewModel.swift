@@ -67,15 +67,22 @@ class VideoPlayerViewModel: ObservableObject {
         isPlaying = false
     }
 
-    private func initSlider() {
-        guard let duration = player?.currentItem?.asset.duration.seconds
-        else { return }
+    private var duration: Double {
+        player?.currentItem?.asset.duration.seconds ?? Double.zero
+    }
 
+    private var maxScale: Double {
+        // Počet vteřin jedné jednotky * maximální měřítko jedné vteřiny
+        (duration / Double(numberOfUnits)) * 3
+    }
+
+    private func initSlider() {
         slider = PreciseSliderViewModel(
             defaultValue: 0,
+            defaultScale: maxScale < 1 ? maxScale : 1,
             minValue: 0,
             maxValue: duration,
-            maxScale: 10.0
+            maxScale: maxScale
         )
     }
 

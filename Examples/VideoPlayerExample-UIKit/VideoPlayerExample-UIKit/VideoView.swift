@@ -50,7 +50,9 @@ class VideoView: UIView, PreciseSliderDataSource {
                 CMTime(
                     seconds: time,
                     preferredTimescale: CMTimeScale(NSEC_PER_SEC)
-                )
+                ),
+            toleranceBefore: CMTime.zero,
+            toleranceAfter: CMTime.zero
         )
     }
 
@@ -113,6 +115,20 @@ class VideoView: UIView, PreciseSliderDataSource {
 
     var maxValue: Double {
         duration
+    }
+
+    var maxScale: Double {
+        // Počet vteřin jedné jednotky * maximální měřítko jedné vteřiny
+        (duration / Double(numberOfUnits)) * 3
+    }
+
+    var defaultScale: Double {
+        if maxScale < 1 {
+            return maxScale
+        }
+        else {
+            return 1
+        }
     }
 
     var minValue: Double = 0
