@@ -14,13 +14,13 @@ public class PreciseAxis2DViewModel: PreciseSliderViewModel {
     var activationTimer: DispatchSourceTimer?
 
     func activeMove(byValue difference: CGFloat) {
-        cancelDeactivation()
-
-        withAnimation(.easeInOut) {
-            active = true
-        }
-
+        activateAxis()
         super.move(byValue: difference)
+    }
+
+    func activeZoom(byValue difference: CGFloat) {
+        activateAxis()
+        super.zoom(byValue: difference)
     }
 
     override public func animateMomentum(byValue difference: CGFloat,
@@ -41,6 +41,14 @@ public class PreciseAxis2DViewModel: PreciseSliderViewModel {
     private func cancelDeactivation() {
         activationTimer?.cancel()
         activationTimer = nil
+    }
+
+    private func activateAxis() {
+        cancelDeactivation()
+
+        withAnimation(.easeInOut) {
+            active = true
+        }
     }
 
     private func deactivateAxis() {
