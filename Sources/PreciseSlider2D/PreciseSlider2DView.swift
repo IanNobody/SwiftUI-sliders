@@ -19,8 +19,20 @@ public struct PreciseSlider2DView<Content: View, AxisXLabel: View, AxisYLabel: V
     @ViewBuilder let axisXLabel: (_ value: Double, _ step: Double) -> AxisXLabel
     @ViewBuilder let axisYLabel: (_ value: Double, _ step: Double) -> AxisYLabel
 
-    public init(axisX: PreciseAxis2DViewModel,
-                axisY: PreciseAxis2DViewModel,
+    //
+    @GestureState var contentDragGestureState: DragGesture.Value?
+    @GestureState var contentZoomGestureState: CGFloat = .zero
+
+    @GestureState var axisXDragGestureState: DragGesture.Value?
+    @State var axisXMomentum: CGFloat = .zero
+    @GestureState var axisXZoomGestureState: CGFloat = .zero
+
+    @GestureState var axisYDragGestureState: DragGesture.Value?
+    @State var axisYMomentum: CGFloat = .zero
+    @GestureState var axisYZoomGestureState: CGFloat = .zero
+
+    //
+    public init(axisX: PreciseAxis2DViewModel, axisY: PreciseAxis2DViewModel,
                 content: @escaping (_ size: CGSize, _ scale: CGSize) -> Content,
                 axisXLabel: @escaping (_ value: Double, _ step: Double) -> AxisXLabel,
                 axisYLabel: @escaping (_ value: Double, _ step: Double) -> AxisYLabel) {
@@ -55,40 +67,26 @@ public struct PreciseSlider2DView<Content: View, AxisXLabel: View, AxisYLabel: V
                 )
                 .gesture(
                     DragGesture(minimumDistance: 0)
-                        .onChanged { gesture in
-                            axisX.move(
-                                byValue: gesture.translation.width
-                                    * gestureXCoefitient(fromFrameSize: geometry.size)
-                            )
-                            axisY.move(
-                                byValue: gesture.translation.height
-                                    * gestureYCoefitient(fromFrameSize: geometry.size)
-                            )
-                        }
-                        .onEnded { gesture in
-                            finishedDragging(
-                                gesture: gesture,
-                                onAxis: axisX,
-                                withFrameSize: geometry.size
-                            )
-                            finishedDragging(
-                                gesture: gesture,
-                                onAxis: axisY,
-                                withFrameSize: geometry.size
-                            )
+                        .updating($contentDragGestureState) { gesture, state, _ in
+                            state = gesture
                         }
                 )
                 .gesture(
                     MagnificationGesture(minimumScaleDelta: 0)
-                        .onChanged { gesture in
-                            axisX.zoom(byValue: gesture.magnitude)
-                            axisY.zoom(byValue: gesture.magnitude)
-                        }
-                        .onEnded { _ in
-                            axisX.editingScaleEnded()
-                            axisY.editingScaleEnded()
+                        .updating($contentZoomGestureState) { gesture, state, _ in
+                            state = gesture
                         }
                 )
+                .onChange(of: contentDragGestureState) { gesture in
+                    if let gesture = gesture {
+                        drag(gesture: gesture, onAxis: axisX, withAxisActivation: false, withFrameSize: geometry.size)
+                        drag(gesture: gesture, onAxis: axisY, withAxisActivation: false, withFrameSize: geometry.size)
+                    }
+                    else {
+                        finishedDragging(onAxis: axisX, withFrameSize: geometry.size)
+                        finishedDragging(onAxis: axisY, withFrameSize: geometry.size)
+                    }
+                }
 
                 // Osa Y
                 ZStack {
@@ -99,12 +97,8 @@ public struct PreciseSlider2DView<Content: View, AxisXLabel: View, AxisYLabel: V
                         truncScale: axisY.truncScale,
                         isInfinite: axisY.isInfinite,
                         isActive: axisY.active,
-                        minDesignValue: minYValue(
-                            fromFrameSize: geometry.size
-                        ),
-                        maxDesignValue: maxYValue(
-                            fromFrameSize: geometry.size
-                        ),
+                        minDesignValue: minValue(fromFrameSize: geometry.size, forAxis: axisY),
+                        maxDesignValue: maxValue(fromFrameSize: geometry.size, forAxis: axisY),
                         numberOfUnits: axisY.numberOfUnits,
                         scaleBase: axisY.scaleBase,
                         valueLabel: { value, step in
@@ -115,7 +109,7 @@ public struct PreciseSlider2DView<Content: View, AxisXLabel: View, AxisYLabel: V
                     .frame(
                         width: contentSize(fromFrameSize: geometry.size).height,
                         height: axisHeight(fromFrameSize: geometry.size) * 2
-                        )
+                    )
                     .rotationEffect(.degrees(90))
                 }
                 .frame(
@@ -124,38 +118,27 @@ public struct PreciseSlider2DView<Content: View, AxisXLabel: View, AxisYLabel: V
                 )
                 .gesture(
                     DragGesture(minimumDistance: 0)
-                        .onChanged { gesture in
-                            axisY.activeMove(
-                                byValue: gesture.translation.height
-                                    * gestureYCoefitient(fromFrameSize: geometry.size)
-                            )
-                        }
-                        .onEnded { gesture in
-                            finishedDragging(
-                                gesture: gesture,
-                                onAxis: axisY,
-                                withFrameSize: geometry.size
-                            )
+                        .updating($axisYDragGestureState) { gesture, state, _ in
+                            state = gesture
                         }
                 )
                 .gesture(
                     MagnificationGesture(minimumScaleDelta: 0)
-                        .onChanged { gesture in
-                            axisY.zoom(byValue: gesture.magnitude)
-                        }
-                        .onEnded { _ in
-                            axisY.editingScaleEnded()
+                        .updating($axisYZoomGestureState) { gesture, state, _ in
+                            state = gesture
                         }
                 )
+                .onChange(of: axisYDragGestureState) { gesture in
+                    if let gesture = gesture {
+                        drag(gesture: gesture, onAxis: axisY, withAxisActivation: true, withFrameSize: geometry.size)
+                    }
+                    else {
+                        finishedDragging(onAxis: axisY, withFrameSize: geometry.size)
+                    }
+                }
                 .offset(
-                    x: (
-                        contentSize(fromFrameSize: geometry.size).width
-                        - axisHeight(fromFrameSize: geometry.size)
-                    ) / 2,
-                    y: (
-                        contentSize(fromFrameSize: geometry.size).height
-                        - geometry.size.height
-                    ) / 2
+                    x: (contentSize(fromFrameSize: geometry.size).width - axisHeight(fromFrameSize: geometry.size)) / 2,
+                    y: (contentSize(fromFrameSize: geometry.size).height - geometry.size.height) / 2
                 )
 
                 // Osa X
@@ -167,12 +150,8 @@ public struct PreciseSlider2DView<Content: View, AxisXLabel: View, AxisYLabel: V
                         truncScale: axisX.truncScale,
                         isInfinite: axisX.isInfinite,
                         isActive: axisX.active,
-                        minDesignValue: minXValue(
-                            fromFrameSize: geometry.size
-                        ),
-                        maxDesignValue: maxXValue(
-                            fromFrameSize: geometry.size
-                        ),
+                        minDesignValue: minValue(fromFrameSize: geometry.size, forAxis: axisX),
+                        maxDesignValue: maxValue(fromFrameSize: geometry.size, forAxis: axisX),
                         numberOfUnits: axisX.numberOfUnits,
                         scaleBase: axisX.scaleBase,
                         valueLabel: { value, step in
@@ -186,30 +165,30 @@ public struct PreciseSlider2DView<Content: View, AxisXLabel: View, AxisYLabel: V
                         height: axisHeight(fromFrameSize: geometry.size) * 2
                     )
                     .gesture(
-                        DragGesture()
-                            .onChanged { gesture in
-                                axisX.activeMove(
-                                    byValue: gesture.translation.width
-                                        * gestureXCoefitient(fromFrameSize: geometry.size)
-                                )
-                            }
-                        .onEnded { gesture in
-                                finishedDragging(
-                                    gesture: gesture,
-                                    onAxis: axisX,
-                                    withFrameSize: geometry.size
-                                )
+                        DragGesture(minimumDistance: 0)
+                            .updating($axisXDragGestureState) { gesture, state, _ in
+                                state = gesture
                             }
                     )
                     .gesture(
-                        MagnificationGesture()
-                            .onChanged { gesture in
-                                axisX.zoom(byValue: gesture.magnitude)
-                            }
-                            .onEnded { _ in
-                                axisX.editingScaleEnded()
+                        MagnificationGesture(minimumScaleDelta: 0)
+                            .updating($axisXZoomGestureState) { gesture, state, _ in
+                                state = gesture
                             }
                     )
+                    .onChange(of: axisXDragGestureState) { gesture in
+                        if let gesture = gesture {
+                            drag(
+                                gesture: gesture,
+                                onAxis: axisX,
+                                withAxisActivation: true,
+                                withFrameSize: geometry.size
+                            )
+                        }
+                        else {
+                            finishedDragging(onAxis: axisX, withFrameSize: geometry.size)
+                        }
+                    }
                 }
                 .frame(
                     width: geometry.size.width,
@@ -220,32 +199,72 @@ public struct PreciseSlider2DView<Content: View, AxisXLabel: View, AxisYLabel: V
                 // Okraj komponenty (roh mezi osami)
                 Rectangle()
                     .frame(
-                        width:
-                            cornerSize(fromFrameSize: geometry.size).width,
-                        height:
-                            cornerSize(fromFrameSize: geometry.size).height
+                        width: cornerSize(fromFrameSize: geometry.size).width,
+                        height: cornerSize(fromFrameSize: geometry.size).height
                     )
                     .offset(cornerOffset(fromFrameSize: geometry.size))
                     .foregroundColor(style.axisBackgroundColor)
             }
             .clipShape(Rectangle())
+            .onChange(of: axisXZoomGestureState) { value in
+                zoom(byValue: value, withAxisActivation: true, onAxis: axisX)
+            }
+            .onChange(of: axisYZoomGestureState) { value in
+                zoom(byValue: value, withAxisActivation: true, onAxis: axisY)
+            }
+            .onChange(of: contentZoomGestureState) { value in
+                zoom(byValue: value, withAxisActivation: false, onAxis: axisX)
+                zoom(byValue: value, withAxisActivation: false, onAxis: axisY)
+            }
         }
     }
 
-    private func finishedDragging(gesture: DragGesture.Value,
-                                  onAxis viewModel: PreciseAxis2DViewModel,
-                                  withFrameSize frame: CGSize) {
-        let value = viewModel === axisX ?
-            (gesture.predictedEndTranslation.width - gesture.translation.width)
-            : (gesture.predictedEndTranslation.height - gesture.translation.height)
+    private func zoom(byValue value: CGFloat, withAxisActivation active: Bool, onAxis axis: PreciseAxis2DViewModel) {
+        if value != 0 {
+            if active {
+                axis.activeZoom(byValue: value)
+            }
+            else {
+                axis.zoom(byValue: value)
+            }
+        }
+        else {
+            axis.editingScaleEnded()
+        }
+    }
 
-        viewModel.animateMomentum(
-            byValue: value,
-            translationCoefitient: gestureXCoefitient(fromFrameSize: frame),
+    private func drag(gesture: DragGesture.Value,
+                      onAxis axis: PreciseAxis2DViewModel,
+                      withAxisActivation active: Bool,
+                      withFrameSize frame: CGSize) {
+        if gesture.translation.width != 0 && gesture.translation.height != 0 {
+            var value = axis === axisX ?
+                gesture.translation.width : gesture.translation.height
+            value = value * gestureCoefitient(fromFrameSize: frame, forAxis: axis)
+
+            if active {
+                axis.activeMove(byValue: value)
+            }
+            else {
+                axis.move(byValue: value)
+            }
+        }
+
+        axisXMomentum = (gesture.predictedEndTranslation.width - gesture.translation.width)
+        axisYMomentum = (gesture.predictedEndTranslation.height - gesture.translation.height)
+    }
+
+    private func finishedDragging(onAxis axis: PreciseAxis2DViewModel, withFrameSize frame: CGSize) {
+        axis.animateMomentum(
+            byValue: axis === axisX ? axisXMomentum : axisYMomentum,
+            translationCoefitient: gestureCoefitient(
+                fromFrameSize: frame,
+                forAxis: axis
+            ),
             duration: 1
         )
 
-        viewModel.editingValueEnded()
+        axis.editingValueEnded()
     }
 
     //
@@ -255,9 +274,9 @@ public struct PreciseSlider2DView<Content: View, AxisXLabel: View, AxisYLabel: V
 
         if valueRange != 0 {
             return (axisX.maxValue - axisX.unsafeValue)
-                * (maxXValue(fromFrameSize: frame) - minXValue(fromFrameSize: frame))
+                * (maxValue(fromFrameSize: frame, forAxis: axisX) - minValue(fromFrameSize: frame, forAxis: axisX))
                 / valueRange
-                + minXValue(fromFrameSize: frame)
+                + minValue(fromFrameSize: frame, forAxis: axisX)
         }
         else {
             return 0
@@ -269,9 +288,9 @@ public struct PreciseSlider2DView<Content: View, AxisXLabel: View, AxisYLabel: V
 
         if valueRange != 0 {
             return (axisY.unsafeValue - axisY.minValue)
-                * (maxYValue(fromFrameSize: frame) - minYValue(fromFrameSize: frame))
+                * (maxValue(fromFrameSize: frame, forAxis: axisY) - minValue(fromFrameSize: frame, forAxis: axisY))
                 / valueRange
-                + minYValue(fromFrameSize: frame)
+                + minValue(fromFrameSize: frame, forAxis: axisY)
         }
         else {
             return 0
@@ -324,40 +343,22 @@ public struct PreciseSlider2DView<Content: View, AxisXLabel: View, AxisYLabel: V
         min(frame.width, frame.height) * 0.05
     }
 
-    private func maxXValue(fromFrameSize frame: CGSize) -> CGFloat {
-        return (contentSize(fromFrameSize: frame).width / 2)
+    private func maxValue(fromFrameSize frame: CGSize, forAxis viewModel: PreciseAxis2DViewModel) -> CGFloat {
+        let size = contentSize(fromFrameSize: frame)
+
+        return viewModel === axisX ? (size.width / 2) : (size.height / 2)
     }
 
-    private func minXValue(fromFrameSize frame: CGSize) -> CGFloat {
-        return -(contentSize(fromFrameSize: frame).width / 2)
+    private func minValue(fromFrameSize frame: CGSize, forAxis viewModel: PreciseAxis2DViewModel) -> CGFloat {
+        -maxValue(fromFrameSize: frame, forAxis: viewModel)
     }
 
-    private func maxYValue(fromFrameSize frame: CGSize) -> CGFloat {
-        return (contentSize(fromFrameSize: frame).height / 2)
-    }
-
-    private func minYValue(fromFrameSize frame: CGSize) -> CGFloat {
-        return -(contentSize(fromFrameSize: frame).height / 2)
-    }
-
-    // Převod délky gesta na hodnotu ekfivalentní rozsahu osy X
-    private func gestureXCoefitient(fromFrameSize frame: CGSize) -> CGFloat {
-        let axisRange = (maxXValue(fromFrameSize: frame) - minXValue(fromFrameSize: frame))
+    // Převod délky gesta na hodnotu ekfivalentní rozsahu osy
+    private func gestureCoefitient(fromFrameSize frame: CGSize, forAxis axis: PreciseAxis2DViewModel) -> CGFloat {
+        let axisRange = maxValue(fromFrameSize: frame, forAxis: axis) - minValue(fromFrameSize: frame, forAxis: axis)
 
         if axisRange > 0 {
-            return (axisX.maxValue - axisX.minValue) / axisRange
-        }
-        else {
-            return 0
-        }
-    }
-
-    // Převod délky gesta na hodnotu ekfivalentní rozsahu osy Y
-    private func gestureYCoefitient(fromFrameSize frame: CGSize) -> CGFloat {
-        let axisRange = (maxYValue(fromFrameSize: frame) - minYValue(fromFrameSize: frame))
-
-        if axisRange > 0 {
-            return (axisY.maxValue - axisY.minValue) / axisRange
+            return (axis.maxValue - axis.minValue) / axisRange
         }
         else {
             return 0

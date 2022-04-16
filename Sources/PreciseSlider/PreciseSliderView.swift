@@ -11,6 +11,12 @@ public struct PreciseSliderView<ValueLabel: View>: View {
     @ObservedObject public var viewModel: PreciseSliderViewModel
     @ViewBuilder public var valueLabel: (_ value: CGFloat, _ stepSize: CGFloat) -> ValueLabel?
 
+    @GestureState private var dragGestureState: DragGesture.Value?
+    @State private var momentum: CGFloat = .zero
+
+    @GestureState private var zoomGestureState: CGFloat = .zero
+
+    //
     public init(viewModel: PreciseSliderViewModel,
                 valueLabel: @escaping (_ value: CGFloat, _ stepSize: CGFloat) -> ValueLabel?) {
         self.viewModel = viewModel
@@ -36,33 +42,46 @@ public struct PreciseSliderView<ValueLabel: View>: View {
             // Výběr hodnoty
             .gesture(
                 DragGesture(minimumDistance: 0)
-                    .onChanged { gesture in
-                        viewModel.move(
-                            byValue: gesture.translation.width
-                            * gestureCoefitient(fromWidth: geometry.size.width)
-                        )
-                    }
-                    .onEnded { gesture in
-                        viewModel.animateMomentum(
-                            byValue:
-                                (gesture.predictedEndTranslation.width - gesture.translation.width),
-                            translationCoefitient: gestureCoefitient(fromWidth: geometry.size.width),
-                            duration: 0.5
-                        )
-
-                        viewModel.editingValueEnded()
+                    .updating($dragGestureState) { actState, prevState, _ in
+                        prevState = actState
                     }
             )
             // Výběr měřítka
             .gesture(
                 MagnificationGesture(minimumScaleDelta: 0)
-                    .onChanged { gesture in
-                        viewModel.zoom(byValue: gesture.magnitude)
-                    }
-                    .onEnded { _ in
-                        viewModel.editingScaleEnded()
+                    .updating($zoomGestureState) { gesture, state, _ in
+                        state = gesture
                     }
             )
+            .onChange(of: dragGestureState) { gesture in
+                if let gesture = gesture {
+                    if gesture.translation.width != 0 {
+                        viewModel.move(
+                            byValue: gesture.translation.width
+                            * gestureCoefitient(fromWidth: geometry.size.width)
+                        )
+                    }
+                    //
+                    momentum = (gesture.predictedEndTranslation.width - gesture.translation.width)
+                }
+                else {
+                    viewModel.animateMomentum(
+                        byValue: momentum,
+                        translationCoefitient: gestureCoefitient(fromWidth: geometry.size.width),
+                        duration: 0.5
+                    )
+
+                    viewModel.editingValueEnded()
+                }
+            }
+            .onChange(of: zoomGestureState) { value in
+                if value != .zero {
+                    viewModel.zoom(byValue: value)
+                }
+                else {
+                    viewModel.editingScaleEnded()
+                }
+            }
         }
     }
 
