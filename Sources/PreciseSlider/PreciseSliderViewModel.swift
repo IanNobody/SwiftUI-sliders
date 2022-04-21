@@ -70,7 +70,6 @@ open class PreciseSliderViewModel: ObservableObject {
         }
         set {
             move(toValue: newValue)
-            prevValue = newValue
         }
     }
 
@@ -80,7 +79,6 @@ open class PreciseSliderViewModel: ObservableObject {
         }
         set {
             zoom(toValue: newValue)
-            prevScale = newValue
         }
     }
 

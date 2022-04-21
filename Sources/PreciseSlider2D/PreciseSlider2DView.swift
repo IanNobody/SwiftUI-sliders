@@ -237,17 +237,15 @@ public struct PreciseSlider2DView<Content: View, AxisXLabel: View, AxisYLabel: V
                       onAxis axis: PreciseAxis2DViewModel,
                       withAxisActivation active: Bool,
                       withFrameSize frame: CGSize) {
-        if gesture.translation.width != 0 && gesture.translation.height != 0 {
-            var value = axis === axisX ?
-                gesture.translation.width : gesture.translation.height
-            value = value * gestureCoefitient(fromFrameSize: frame, forAxis: axis)
+        var value = axis === axisX ?
+            gesture.translation.width : gesture.translation.height
+        value = value * gestureCoefitient(fromFrameSize: frame, forAxis: axis)
 
-            if active {
-                axis.activeMove(byValue: value)
-            }
-            else {
-                axis.move(byValue: value)
-            }
+        if active {
+            axis.activeMove(byValue: value)
+        }
+        else {
+            axis.move(byValue: value)
         }
 
         axisXMomentum = (gesture.predictedEndTranslation.width - gesture.translation.width)

@@ -73,7 +73,7 @@ class VideoPlayerViewModel: ObservableObject {
 
     private var maxScale: Double {
         // Počet vteřin jedné jednotky * maximální měřítko jedné vteřiny
-        (duration / Double(numberOfUnits)) * 3
+        (duration / Double(slider?.numberOfUnits ?? 20)) * 3
     }
 
     private func initSlider() {
