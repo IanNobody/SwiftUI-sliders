@@ -40,9 +40,15 @@ struct PreciseContent2DView<Content: View>: View, Animatable {
             ZStack {
                 // Vizualizace
                 ZStack {
-                    ContentView(isXInfinite: isXInfinite, isYInfinite: isYInfinite) {
-                        content(geometry.size, scale)
-                    }
+                    ContentView(
+                        isXInfinite: isXInfinite,
+                        isYInfinite: isYInfinite,
+                        maxRows: maxNumberOfContents(from: scale.height),
+                        maxCols: maxNumberOfContents(from: scale.width),
+                        content: {
+                            content(geometry.size, scale)
+                        }
+                    )
                     .scaleEffect(scale)
                 }
                 .frame(
@@ -61,9 +67,15 @@ struct PreciseContent2DView<Content: View>: View, Animatable {
                         .frame(width: 1, height: style.pointerSize.height)
                         .overlay(
                             ZStack {
-                                ContentView(isXInfinite: isXInfinite, isYInfinite: isYInfinite) {
-                                    content(geometry.size, scale)
-                                }
+                                ContentView(
+                                    isXInfinite: isXInfinite,
+                                    isYInfinite: isYInfinite,
+                                    maxRows: maxNumberOfContents(from: scale.height),
+                                    maxCols: maxNumberOfContents(from: scale.width),
+                                    content: {
+                                        content(geometry.size, scale)
+                                    }
+                                )
                                 .scaleEffect(scale)
                             }
                             .frame(
@@ -81,9 +93,15 @@ struct PreciseContent2DView<Content: View>: View, Animatable {
                         .frame(width: style.pointerSize.width, height: 1)
                         .overlay(
                             ZStack {
-                                ContentView(isXInfinite: isXInfinite, isYInfinite: isYInfinite) {
-                                    content(geometry.size, scale)
-                                }
+                                ContentView(
+                                    isXInfinite: isXInfinite,
+                                    isYInfinite: isYInfinite,
+                                    maxRows: maxNumberOfContents(from: scale.height),
+                                    maxCols: maxNumberOfContents(from: scale.width),
+                                    content: {
+                                        content(geometry.size, scale)
+                                    }
+                                )
                                 .scaleEffect(scale)
                             }
                             .frame(
@@ -117,9 +135,15 @@ struct PreciseContent2DView<Content: View>: View, Animatable {
                                 .foregroundColor(style.axisBackgroundColor)
                             //
                             ZStack {
-                                ContentView(isXInfinite: isXInfinite, isYInfinite: isYInfinite) {
-                                    content(geometry.size, scale)
-                                }
+                                ContentView(
+                                    isXInfinite: isXInfinite,
+                                    isYInfinite: isYInfinite,
+                                    maxRows: maxNumberOfContents(from: scale.width),
+                                    maxCols: maxNumberOfContents(from: scale.height),
+                                    content: {
+                                        content(geometry.size, scale)
+                                    }
+                                )
                                 .scaleEffect(
                                     CGSize(
                                         width: scale.width * 1.3,
@@ -152,15 +176,15 @@ struct PreciseContent2DView<Content: View>: View, Animatable {
         .drawingGroup()
     }
 
-    func minValue(from size: CGFloat) -> CGFloat {
+    private func minValue(from size: CGFloat) -> CGFloat {
         -(size / 2)
     }
 
-    func maxValue(from size: CGFloat) -> CGFloat {
+    private func maxValue(from size: CGFloat) -> CGFloat {
         (size / 2)
     }
 
-    func truncOffset(by frameSize: CGSize) -> CGSize {
+    private func truncOffset(by frameSize: CGSize) -> CGSize {
         var x = (offset.first + maxValue(from: frameSize.width)).truncatingRemainder(dividingBy: frameSize.width)
         var y = (offset.second + maxValue(from: frameSize.height)).truncatingRemainder(dividingBy: frameSize.height)
 
@@ -178,16 +202,42 @@ struct PreciseContent2DView<Content: View>: View, Animatable {
             y += maxValue(from: frameSize.height)
         }
 
+        let centerOffset = centerOffset(fromFrameSize: frameSize)
+
         return CGSize(
-            width: (isXInfinite ? x - frameSize.width : offset.first),
-            height: (isYInfinite ? y - frameSize.height : offset.second)
+            width: (isXInfinite ? x - centerOffset.width : offset.first),
+            height: (isYInfinite ? y - centerOffset.height : offset.second)
         )
+    }
+
+    private func centerOffset(fromFrameSize frame: CGSize) -> CGSize {
+        return CGSize(
+            width: frame.width
+                * CGFloat(Int(maxNumberOfContents(from: scale.width) / 2)),
+            height: frame.height
+                * CGFloat(Int(maxNumberOfContents(from: scale.height) / 2))
+        )
+    }
+
+    private func maxNumberOfContents(from scale: CGFloat) -> Int {
+        if scale >= 0.5 {
+            return 3
+        }
+        else if scale == 0 {
+            return 0
+        }
+        else {
+            let base = Int(ceil(1 / scale))
+            return base % 2 == 0 ? base + 3 : base + 2
+        }
     }
 }
 
 private struct ContentView<Content: View>: View {
     let isXInfinite: Bool
     let isYInfinite: Bool
+    let maxRows: Int
+    let maxCols: Int
 
     //
     let content: () -> Content
@@ -195,9 +245,9 @@ private struct ContentView<Content: View>: View {
     var body: some View {
         GeometryReader { geometry in
             VStack(spacing: 0) {
-                ForEach(0..<(isYInfinite ? 3 : 1), id: \.self) { _ in
+                ForEach(0..<(isYInfinite ? maxRows : 1), id: \.self) { _ in
                     HStack(spacing: 0) {
-                        ForEach(0..<(isXInfinite ? 3 : 1), id: \.self) { _ in
+                        ForEach(0..<(isXInfinite ? maxCols : 1), id: \.self) { _ in
                             content()
                                 .frame(
                                     width: geometry.size.width,
@@ -216,8 +266,8 @@ private struct ContentView<Content: View>: View {
 struct PreciseSliderContentView_Previews: PreviewProvider {
     static var previews: some View {
         PreciseContent2DView(
-            scale: CGSize(width: 1, height: 1),
-            offset: AnimatablePair(-1234, 0),
+            scale: CGSize(width: 0.3, height: 1),
+            offset: AnimatablePair(0, 0),
             isXInfinite: true,
             isYInfinite: false,
             content: { size, _ in
@@ -237,5 +287,6 @@ struct PreciseSliderContentView_Previews: PreviewProvider {
                 .border(.red)
             }
         )
+        .frame(width: 300, height: 300, alignment: .center)
     }
 }
