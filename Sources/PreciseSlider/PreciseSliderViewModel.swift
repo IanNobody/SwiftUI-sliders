@@ -12,7 +12,9 @@ import Combine
 open class PreciseSliderViewModel: ObservableObject {
     @Published public private(set) var unsafeValue: Double {
         didSet {
-            valuePublisher.send(value)
+            if oldValue != unsafeValue {
+                valuePublisher.send(value)
+            }
         }
     }
     @Published public private(set) var scale: Double
@@ -193,13 +195,13 @@ open class PreciseSliderViewModel: ObservableObject {
     func animateOutsideHardBounds(to newValue: CGFloat, by difference: CGFloat, with duration: CGFloat) {
         if unsafeValue > correctMinValue && unsafeValue < correctMaxValue
                 && !isInfinite {
-            withAnimation(.spring(response: 0.55, dampingFraction: 0.75, blendDuration: 0.0)) {
+            withAnimation(.spring(dampingFraction: 0.75)) {
                 unsafeValue = newValue > correctMaxValue ? correctMaxValue : correctMinValue
                 prevValue = newValue > correctMaxValue ? correctMaxValue : correctMinValue
             }
         }
         else {
-            withAnimation(.spring()) {
+            withAnimation(.spring(dampingFraction: 1)) {
                 unsafeValue = unsafeValue > correctMaxValue ? correctMaxValue : correctMinValue
                 prevValue = unsafeValue > correctMaxValue ? correctMaxValue : correctMinValue
             }
