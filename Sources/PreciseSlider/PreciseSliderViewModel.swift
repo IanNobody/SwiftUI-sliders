@@ -202,8 +202,8 @@ open class PreciseSliderViewModel: ObservableObject {
         }
         else {
             withAnimation(.spring(dampingFraction: 1)) {
-                unsafeValue = unsafeValue > correctMaxValue ? correctMaxValue : correctMinValue
-                prevValue = unsafeValue > correctMaxValue ? correctMaxValue : correctMinValue
+                unsafeValue = unsafeValue >= correctMaxValue ? correctMaxValue : correctMinValue
+                prevValue = unsafeValue >= correctMaxValue ? correctMaxValue : correctMinValue
             }
         }
     }
