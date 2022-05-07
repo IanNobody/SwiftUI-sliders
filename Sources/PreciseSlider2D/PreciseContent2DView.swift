@@ -155,8 +155,8 @@ struct PreciseContent2DView<Content: View>: View, Animatable {
                                 height: geometry.size.height
                             )
                             .offset(
-                                x: truncOffset(by: geometry.size).width * 0.5 * scale.width,
-                                y: truncOffset(by: geometry.size).height * 0.5 * scale.height
+                                x: truncOffset(by: geometry.size).width * scale.width * 0.5,
+                                y: truncOffset(by: geometry.size).height * scale.height * 0.5
                             )
                             .blur(radius: 50)
                             .brightness(-0.3)
@@ -227,8 +227,8 @@ struct PreciseContent2DView<Content: View>: View, Animatable {
             return 0
         }
         else {
-            let base = Int(ceil(1 / scale))
-            return base % 2 == 0 ? base + 3 : base + 2
+            let base = Int(ceil(1 / scale)) + 2
+            return base % 2 == 0 ? base + 1 : base
         }
     }
 }

@@ -21,6 +21,14 @@ public class PreciseSliderStyle {
     }
 }
 
+//
+// Částečně převzato z:
+//
+// Styling custom SwiftUI views using environment (9.12.2020)
+// Autor: Majid Jabrayilov
+// URL: https://swiftwithmajid.com/2020/12/09/styling-custom-swiftui-views-using-environment/
+//
+
 struct PreciseSliderStyleEnviromentKey: EnvironmentKey {
     static var defaultValue: PreciseSliderStyle = .init()
 }
@@ -37,3 +45,7 @@ extension View {
         environment(\.preciseSliderStyle, style)
     }
 }
+
+//
+// Konec převzaté části
+//

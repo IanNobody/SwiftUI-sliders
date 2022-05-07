@@ -55,12 +55,23 @@ class ColorPicker: UIViewController, PreciseSlider2DDataSource {
             saturationLayer.startPoint = CGPoint(x: 0, y: 1)
             saturationLayer.endPoint = CGPoint(x: 0, y: 0)
 
+            //
+            // Částečně převzato z:
+            //
+            // Stack Overflow - How to convert a UIView to an image
+            // Autoři: Naveed J. [https://stackoverflow.com/users/5249319/naveed-j],
+            //         následně upravil John Montgomery [https://stackoverflow.com/users/7496073/john-montgomery]
+            // URL: https://stackoverflow.com/questions/30696307/how-to-convert-a-uiview-to-an-image
+            //
             UIGraphicsBeginImageContext(ofSize)
             colorLayer.render(in: UIGraphicsGetCurrentContext()!)
             saturationLayer.render(in: UIGraphicsGetCurrentContext()!)
             let image = UIGraphicsGetImageFromCurrentImageContext()
             UIGraphicsEndImageContext()
             contentImage = image
+            //
+            // Konec převzaté části
+            //
         }
 
         return contentImage
