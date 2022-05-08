@@ -32,7 +32,7 @@ Sám balíček nabízí dvě komponenty, a to pro výběr jednorozměrných hodn
 ### Import balíčku
 
 Import balíčku je možný pomocí nabídky `Package Manager`, kterou je možné nalézt ve vývojovém prostředí XCode volbou `File > Add Packages....`
-Zde je nejprve potřeba do pole v pravém horním rohu zadat adresu [URL veřejného repozitáře balíčku](https://github.com/IanNobody/SwiftUI-sliders).
+Zde je nejprve potřeba do pole v pravém horním rohu zadat [adresu URL](https://github.com/IanNobody/SwiftUI-sliders) veřejného repozitáře balíčku.
 Po zadání adresy následně vybrat parametry pro specifikaci verze, konkrétního bodu, či větve repozitáře a cílový projekt pro import balíčku.
 Po zvolení parametrů pak stačí pouze výběr potvrdit, přičemž se provede stažení.
 Následně lze využít tento balíček v kódu.
