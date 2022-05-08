@@ -220,10 +220,6 @@ open class PreciseSliderViewModel: ObservableObject {
                               duration: CGFloat) {
         let newValue = unsafeValue - ((difference * coefitient) / scale)
 
-        if difference <= 5  && newValue > correctMinValue && newValue < correctMaxValue {
-            return
-        }
-
         // Zastavení probíhajících animací
         withAnimation(.linear(duration: 0)) {
             unsafeValue = unsafeValue

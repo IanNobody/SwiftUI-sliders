@@ -351,7 +351,7 @@ public struct PreciseSlider2DView<Content: View, AxisXLabel: View, AxisYLabel: V
         -maxValue(fromFrameSize: frame, forAxis: viewModel)
     }
 
-    // Převod délky gesta na hodnotu ekfivalentní rozsahu osy
+    // Převod délky gesta na hodnotu ekvivalentní rozsahu osy
     private func gestureCoefitient(fromFrameSize frame: CGSize, forAxis axis: PreciseAxis2DViewModel) -> CGFloat {
         let axisRange = maxValue(fromFrameSize: frame, forAxis: axis) - minValue(fromFrameSize: frame, forAxis: axis)
 
