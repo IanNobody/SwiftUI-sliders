@@ -220,6 +220,11 @@ open class PreciseSliderViewModel: ObservableObject {
                               duration: CGFloat) {
         let newValue = unsafeValue - ((difference * coefitient) / scale)
 
+        // Konstanta 20 odpovídá toleranci drobných pohybů při uvolnení palce z dotykové plochy
+        if abs(difference) <= 20 && newValue > correctMinValue && newValue < correctMaxValue {
+            return
+        }
+
         // Zastavení probíhajících animací
         withAnimation(.linear(duration: 0)) {
             unsafeValue = unsafeValue
