@@ -34,6 +34,8 @@ public class PreciseSlider2DStyle {
         case blurredContent
         case color(Color)
 
+        #if !os(macOS)
+
         init(uiSliderBackground background: UIPreciseSlider2DBackground) {
             switch background {
             case .color(let color):
@@ -42,7 +44,11 @@ public class PreciseSlider2DStyle {
                 self = .blurredContent
             }
         }
+
+        #endif
     }
+
+    #if !os(macOS)
 
     public enum UIPreciseSlider2DBackground: Equatable {
         case blurredContent
@@ -58,10 +64,14 @@ public class PreciseSlider2DStyle {
         }
     }
 
+    #endif
+
     // Barva ukazatele
     public enum PreciseSlider2DPointerColor: Equatable {
         case invertedColor
         case staticColor(Color)
+
+        #if !os(macOS)
 
         init(uiPointerColor color: UIPreciseSlider2DPointerColor) {
             switch color {
@@ -71,7 +81,11 @@ public class PreciseSlider2DStyle {
                 self = .invertedColor
             }
         }
+
+        #endif
     }
+
+    #if !os(macOS)
 
     public enum UIPreciseSlider2DPointerColor: Equatable {
         case invertedColor
@@ -86,6 +100,8 @@ public class PreciseSlider2DStyle {
             }
         }
     }
+
+    #endif
 }
 
 //
