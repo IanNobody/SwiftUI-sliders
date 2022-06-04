@@ -19,3 +19,30 @@ SwiftUI komponenta pro výběr strukturovaného vstupu od uživatele na platform
 
  
 **Kategorie:** Uživatelská rozhraní
+
+## Použití balíčku
+
+V následujících bodech bude popsán způsob použití balíčku ve vlastním projektu.
+Sám balíček nabízí dvě komponenty, a to pro výběr jednorozměrných hodnot (`PreciseSlider`) a pro výběr dvourozměrných hodnot (`PreciseSlider2D`).
+
+**Požadavky:**
+- Vývojové prostředí XCode
+- iOS 15.0 / macOS 12.0
+
+### Import balíčku
+
+Import balíčku je možný pomocí nabídky `Package Manager`, kterou je možné nalézt ve vývojovém prostředí XCode volbou `File > Add Packages....`
+Zde je nejprve potřeba do pole v pravém horním rohu zadat [adresu URL](https://github.com/IanNobody/SwiftUI-sliders) veřejného repozitáře balíčku.
+Po zadání adresy následně vybrat parametry pro specifikaci verze, konkrétního bodu, či větve repozitáře a cílový projekt pro import balíčku.
+Po zvolení parametrů pak stačí pouze výběr potvrdit, přičemž se provede stažení.
+Následně lze využít tento balíček v kódu.
+
+![Ukázka nabídky Package Manager.](https://github.com/IanNobody/SwiftUI-sliders/blob/main/doc/import.png?raw=true)
+
+Využití obou komponent je možné v implementační části provést po importu v konkrétním souboru ve formátu `import <nazev_komponenty>`.
+Implementace obou komponent obsahuje rozhraní pro použití v aplikacích jak za použití technologie SwiftUI, tak i UIKit. 
+Příklad jejich použití je možné nalézt v demonstračních projektech v adresáři [Examples](https://github.com/IanNobody/SwiftUI-sliders/tree/main/Examples).
+
+Spuštění demonstračních projektů je možné otevřením konkrétního projektu ve vývojovém prostředí XCode a spuštění klávesovou zkratkou `Command+R`, případně volbou `Product > Run`.
+
+
